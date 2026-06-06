@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ngebut Store — Game Pass CDID Termurah</title>
+<style>
+:root {
+  --g: #16a34a; --gl: #22c55e; --gd: #15803d;
+  --gbg: #f0fdf4; --gbr: #bbf7d0;
+  --card: #ffffff; --bg: #f4f7f4;
+  --text: #0c150c; --muted: #5a6e5a;
+  --border: #dde8dd; --r: 16px; --rs: 10px;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-bold: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+nav {
+  background: #fff; border-bottom: 1px solid var(--border);
+  padding: 0 1.25rem; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+}
+.logo {
+  font-family: var(--font-bold); font-weight: 800; font-size: 1.15rem;
+  color: var(--g); display: flex; align-items: center; gap: 7px;
+}
+.logo-icon { width: 30px; height: 30px; background: var(--g); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+.nav-pill { background: var(--gbg); color: var(--g); font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--gbr); }
+
+.hero {
+  background: linear-gradient(160deg, #032010 0%, #0a3d1a 50%, #0f5c28 100%);
+  padding: 2.25rem 1.25rem 2rem; text-align: center; color: #fff;
+  position: relative; overflow: hidden;
+}
+.hero-glow { position: absolute; inset: 0; background: radial-gradient(ellipse 80% 60% at 50% 110%, rgba(34,197,94,0.18) 0%, transparent 70%); pointer-events: none; }
+.hero-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.35); color: #86efac; font-size: 10px; font-weight: 700; padding: 5px 12px; border-radius: 20px; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.8px; }
+.hero h1 { font-family: var(--font-bold); font-size: 1.8rem; font-weight: 800; line-height: 1.15; margin-bottom: 0.5rem; }
+.hero h1 span { color: #4ade80; }
+.hero p { color: #86efac; font-size: 0.85rem; }
+.hero-stats { display: flex; justify-content: center; gap: 2rem; margin-top: 1.5rem; position: relative; z-index: 1; }
+.stat-num { font-family: var(--font-bold); font-size: 1.05rem; font-weight: 800; color: #fff; }
+.stat-lbl { font-size: 9px; color: #86efac; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 1px; }
+
+.ticker { background: var(--g); padding: 7px 0; overflow: hidden; white-space: nowrap; }
+.ticker-inner { display: inline-flex; animation: ticker 22s linear infinite; }
+.ticker-inner span { color: #fff; font-size: 11px; font-weight: 600; padding: 0 1.5rem; opacity: 0.9; }
+.ticker-inner span::before { content: '🚗 '; }
+@keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+main { max-width: 460px; margin: 0 auto; padding: 1.5rem 1rem 5rem; }
+.sec-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin-bottom: 0.65rem; }
+
+.passes { display: flex; flex-direction: column; gap: 9px; margin-bottom: 1.5rem; }
+.pass-card { background: var(--card); border: 2px solid var(--border); border-radius: var(--r); padding: 0.9rem 1rem; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 12px; position: relative; }
+.pass-card:hover { border-color: #86efac; box-shadow: 0 2px 14px rgba(22,163,74,0.09); }
+.pass-card.selected { border-color: var(--g); background: #f7fef9; box-shadow: 0 0 0 3px rgba(22,163,74,0.08); }
+.pass-icon { width: 44px; height: 44px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0; }
+.pass-info { flex: 1; min-width: 0; }
+.pass-name { font-family: var(--font-bold); font-weight: 700; font-size: 0.83rem; margin-bottom: 2px; }
+.pass-desc { font-size: 0.7rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pass-right { text-align: right; flex-shrink: 0; }
+.pass-robux { font-size: 0.65rem; color: var(--muted); margin-bottom: 1px; }
+.pass-price { font-family: var(--font-bold); font-size: 0.9rem; font-weight: 800; color: var(--g); }
+.pass-check { position: absolute; top: -1px; right: -1px; width: 22px; height: 22px; border-radius: 0 var(--r) 0 var(--rs); background: var(--g); display: none; align-items: center; justify-content: center; }
+.pass-check svg { width: 10px; height: 10px; stroke: #fff; stroke-width: 3; fill: none; }
+.pass-card.selected .pass-check { display: flex; }
+.hot-badge { position: absolute; top: -7px; left: 12px; background: linear-gradient(90deg,#ef4444,#f97316); color: #fff; font-size: 8px; font-weight: 800; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; }
+
+.form-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 1.1rem; margin-bottom: 0.85rem; }
+.form-lbl { font-size: 0.72rem; font-weight: 700; color: var(--text); margin-bottom: 6px; display: block; }
+.form-lbl span { color: var(--muted); font-weight: 400; }
+input[type="text"] { width: 100%; padding: 10px 13px; border: 1.5px solid var(--border); border-radius: var(--rs); font-family: var(--font); font-size: 0.875rem; color: var(--text); background: var(--bg); outline: none; transition: border-color 0.15s; }
+input[type="text"]:focus { border-color: var(--g); background: #fff; }
+.form-hint { font-size: 0.68rem; color: var(--muted); margin-top: 5px; }
+
+.summary { background: var(--gbg); border: 1px solid var(--gbr); border-radius: var(--r); padding: 0.9rem 1rem; margin-bottom: 0.85rem; display: none; }
+.summary.show { display: block; }
+.sum-row { display: flex; justify-content: space-between; font-size: 0.77rem; color: var(--muted); margin-bottom: 5px; }
+.sum-total { display: flex; justify-content: space-between; font-family: var(--font-bold); font-weight: 800; font-size: 0.95rem; border-top: 1px solid var(--gbr); padding-top: 7px; margin-top: 7px; }
+
+.pay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+.pay-opt { background: var(--card); border: 2px solid var(--border); border-radius: var(--rs); padding: 10px 8px; cursor: pointer; text-align: center; font-size: 0.72rem; font-weight: 700; transition: all 0.14s; }
+.pay-opt:hover { border-color: #86efac; }
+.pay-opt.selected { border-color: var(--g); background: var(--gbg); color: var(--g); }
+.pay-icon { font-size: 1.3rem; margin-bottom: 3px; }
+
+.btn-order { width: 100%; background: var(--g); color: #fff; border: none; border-radius: var(--r); padding: 14px; font-family: var(--font-bold); font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-order:hover:not(:disabled) { background: var(--gd); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(22,163,74,0.25); }
+.btn-order:disabled { background: #9ca3af; cursor: not-allowed; transform: none; }
+.spinner { animation: spin 0.7s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.guarantee { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--border); border-radius: var(--rs); padding: 10px 14px; margin-top: 0.85rem; font-size: 0.75rem; }
+.guarantee strong { display: block; font-size: 0.78rem; font-weight: 700; margin-bottom: 1px; }
+.guarantee span { color: var(--muted); font-size: 0.68rem; }
+
+/* PAYMENT PAGE */
+#payPage { display: none; }
+.page-header { background: linear-gradient(135deg, #032010 0%, #0a3d1a 100%); padding: 1.1rem 1.25rem; display: flex; align-items: center; gap: 12px; color: #fff; }
+.back-btn { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.15); border: none; color: #fff; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.page-header-title { font-family: var(--font-bold); font-weight: 700; font-size: 0.95rem; }
+.page-main { max-width: 460px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
+
+.pay-amount-card { background: var(--g); border-radius: var(--r); padding: 1.5rem; text-align: center; color: #fff; margin-bottom: 1rem; }
+.pay-amount-lbl { font-size: 0.75rem; opacity: 0.85; margin-bottom: 6px; }
+.pay-amount-num { font-family: var(--font-bold); font-size: 2rem; font-weight: 800; }
+.pay-amount-sub { font-size: 0.72rem; opacity: 0.75; margin-top: 4px; }
+
+.timer-card { background: #fff9f0; border: 1px solid #fed7aa; border-radius: var(--rs); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; font-size: 0.8rem; }
+.timer-lbl { color: #92400e; }
+.timer-val { font-family: var(--font-bold); font-weight: 800; color: #b45309; font-size: 1rem; }
+
+.va-box { background: var(--gbg); border: 2px dashed var(--gbr); border-radius: var(--r); padding: 1.25rem; text-align: center; margin-bottom: 1rem; }
+.va-lbl { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 8px; }
+.va-number { font-family: monospace; font-size: 1.4rem; font-weight: 700; color: var(--g); letter-spacing: 2px; }
+.va-copy-btn { margin-top: 10px; background: var(--g); color: #fff; border: none; border-radius: var(--rs); padding: 8px 20px; font-family: var(--font); font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+
+.pay-detail-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 1.1rem 1.25rem; margin-bottom: 1rem; }
+.pay-row { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 6px 0; }
+.pay-row + .pay-row { border-top: 1px dashed var(--border); }
+.pay-row-lbl { color: var(--muted); }
+.pay-row-val { font-weight: 600; }
+.pay-row-val.green { color: var(--g); font-family: var(--font-bold); }
+
+.btn-paid { width: 100%; background: var(--g); color: #fff; border: none; border-radius: var(--r); padding: 14px; font-family: var(--font-bold); font-size: 0.93rem; font-weight: 700; cursor: pointer; transition: all 0.15s; margin-bottom: 0.75rem; }
+.btn-paid:hover { background: var(--gd); }
+.btn-paid:disabled { background: #9ca3af; cursor: not-allowed; }
+
+/* TX PAGE */
+#txPage { display: none; }
+.tx-main { max-width: 460px; margin: 0 auto; padding: 1.25rem 1rem 5rem; }
+
+.status-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 1.25rem; margin-bottom: 1rem; }
+.prog-bar { display: flex; gap: 5px; margin-bottom: 1.25rem; }
+.prog-seg { flex: 1; height: 5px; border-radius: 10px; background: #e5e7eb; transition: background 0.4s; }
+.prog-seg.done { background: var(--g); }
+.prog-seg.active { background: #86efac; }
+
+.status-main { display: flex; align-items: center; gap: 14px; }
+.status-icon { width: 50px; height: 50px; border-radius: 50%; background: var(--gbg); border: 2px solid var(--gbr); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+.status-lbl { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 2px; }
+.status-val { font-family: var(--font-bold); font-weight: 800; font-size: 1rem; color: var(--g); }
+.status-sub { font-size: 0.73rem; color: var(--muted); margin-top: 2px; }
+
+.timeline { background: var(--gbg); border: 1px solid var(--gbr); border-radius: var(--rs); padding: 1rem; margin-top: 1rem; }
+.tl-item { display: flex; gap: 11px; }
+.tl-item + .tl-item { margin-top: 13px; }
+.tl-dot { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+.tl-dot.done { background: var(--g); }
+.tl-dot.done svg { width: 10px; height: 10px; stroke: #fff; stroke-width: 3; fill: none; }
+.tl-dot.active { background: #fff; border: 2.5px solid var(--g); }
+.tl-dot.active::after { content: ''; width: 7px; height: 7px; background: var(--g); border-radius: 50%; }
+.tl-dot.pending { background: #e5e7eb; border: 2px solid #d1d5db; }
+.tl-stat { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.tl-stat.done, .tl-stat.active { color: var(--g); }
+.tl-stat.pending { color: var(--muted); }
+.tl-time { font-size: 0.67rem; color: var(--muted); margin-top: 1px; }
+.tl-desc { font-size: 0.71rem; color: var(--muted); margin-top: 2px; }
+
+.schedule-row { background: #fff; border: 1px solid var(--border); border-radius: var(--rs); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; margin-top: 0.85rem; }
+.schedule-row span:first-child { color: var(--muted); }
+.schedule-row span:last-child { font-weight: 700; }
+
+.tx-detail-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 1rem 1.1rem; margin-bottom: 1rem; }
+.tx-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.79rem; padding: 6px 0; }
+.tx-row + .tx-row { border-top: 1px solid var(--border); }
+.tx-row-lbl { color: var(--muted); }
+.tx-row-val { font-weight: 600; }
+.tx-id-val { font-family: monospace; color: var(--g); font-weight: 700; font-size: 0.83rem; display: flex; align-items: center; gap: 6px; }
+.copy-id-btn { background: var(--gbg); border: 1px solid var(--gbr); color: var(--g); font-size: 0.6rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; cursor: pointer; font-family: var(--font); }
+
+.secure-badge { background: var(--gbg); border: 1px solid var(--gbr); border-radius: var(--r); padding: 0.9rem 1.1rem; display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
+.secure-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--g); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.secure-badge strong { font-size: 0.82rem; font-weight: 800; color: var(--g); display: block; }
+.secure-badge small { font-size: 0.68rem; color: var(--muted); }
+
+.guide-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; margin-bottom: 1rem; }
+.guide-hd { display: flex; align-items: center; justify-content: space-between; padding: 0.95rem 1.1rem; cursor: pointer; font-family: var(--font-bold); font-weight: 700; font-size: 0.83rem; }
+.guide-chev { transition: transform 0.2s; color: var(--muted); }
+.guide-hd.open .guide-chev { transform: rotate(180deg); }
+.guide-body { display: none; padding: 0 1.1rem 1.1rem; }
+.guide-body.open { display: block; }
+.g-step { display: flex; gap: 9px; margin-bottom: 9px; align-items: flex-start; }
+.g-num { width: 21px; height: 21px; border-radius: 50%; background: var(--g); color: #fff; font-size: 0.65rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.g-text { font-size: 0.77rem; color: var(--muted); line-height: 1.55; }
+.g-text strong { color: var(--g); }
+
+/* CEK STATUS */
+.cek-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 1rem 1.1rem; margin-bottom: 1rem; }
+.cek-card p { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.6rem; }
+.cek-row { display: flex; gap: 8px; }
+.cek-input { flex: 1; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: var(--rs); font-family: var(--font); font-size: 0.82rem; outline: none; transition: border-color 0.15s; }
+.cek-input:focus { border-color: var(--g); }
+.btn-cek { background: var(--g); color: #fff; border: none; border-radius: var(--rs); padding: 9px 16px; font-family: var(--font-bold); font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+
+.wa-fab { position: fixed; bottom: 1.25rem; right: 1.25rem; width: 52px; height: 52px; background: #25d366; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; text-decoration: none; box-shadow: 0 4px 18px rgba(37,211,102,0.45); z-index: 200; transition: transform 0.15s; }
+.wa-fab:hover { transform: scale(1.08); }
+
+/* LOADING OVERLAY */
+.loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.85); z-index: 400; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+.loading-overlay.show { display: flex; }
+.loading-spinner { width: 40px; height: 40px; border: 4px solid var(--gbr); border-top-color: var(--g); border-radius: 50%; animation: spin 0.7s linear infinite; }
+.loading-text { font-size: 0.82rem; color: var(--muted); font-weight: 600; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(60px); background: #0c150c; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; z-index: 500; transition: transform 0.3s ease; white-space: nowrap; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.fade-up { animation: fadeUp 0.35s ease forwards; }
+</style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loadingText">Memproses...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ============ STORE PAGE ============ -->
+<div id="storePage">
+  <nav>
+    <div class="logo"><div class="logo-icon">🚗</div>Ngebut Store</div>
+    <span class="nav-pill">🔒 100% Aman</span>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-badge">🚗 Car Driving Indonesia</div>
+    <h1>Game Pass <span>CDID</span><br>Harga Paling Murah</h1>
+    <p>Proses aman · Dijamin masuk · Terpercaya</p>
+    <div class="hero-stats">
+      <div><div class="stat-num">4.9⭐</div><div class="stat-lbl">Rating</div></div>
+      <div><div class="stat-num">2.400+</div><div class="stat-lbl">Terjual</div></div>
+      <div><div class="stat-num">100%</div><div class="stat-lbl">Garansi</div></div>
+    </div>
+  </div>
+
+  <div class="ticker"><div class="ticker-inner" id="tickerInner"></div></div>
+
+  <main>
+    <p class="sec-lbl">Pilih Game Pass</p>
+    <div class="passes" id="passList"></div>
+
+    <div class="form-card">
+      <label class="form-lbl">Username Roblox <span>(akun yang mau di-gift)</span></label>
+      <input type="text" id="usernameInput" placeholder="Contoh: Budi_Roblox123" autocomplete="off" oninput="updateSummary()">
+      <p class="form-hint">⚠️ Pastikan username benar — gift tidak bisa dibatalkan</p>
+    </div>
+
+    <div class="summary" id="summary">
+      <div class="sum-row"><span>Game Pass</span><span id="sumPass">—</span></div>
+      <div class="sum-row"><span>Username</span><span id="sumUser">—</span></div>
+      <div class="sum-row"><span>Metode Bayar</span><span id="sumMethod">—</span></div>
+      <div class="sum-total"><span>Total</span><span id="sumTotal">—</span></div>
+    </div>
+
+    <p class="sec-lbl">Metode Pembayaran</p>
+    <div class="pay-grid">
+      <div class="pay-opt" data-method="DANA" onclick="selectMethod(this)"><div class="pay-icon">💙</div>DANA</div>
+      <div class="pay-opt" data-method="GoPay" onclick="selectMethod(this)"><div class="pay-icon">💚</div>GoPay</div>
+      <div class="pay-opt" data-method="OVO" onclick="selectMethod(this)"><div class="pay-icon">💜</div>OVO</div>
+      <div class="pay-opt" data-method="Transfer Bank" onclick="selectMethod(this)"><div class="pay-icon">🏦</div>Transfer Bank</div>
+      <div class="pay-opt" data-method="QRIS" onclick="selectMethod(this)"><div class="pay-icon">📱</div>QRIS</div>
+      <div class="pay-opt" data-method="ShopeePay" onclick="selectMethod(this)"><div class="pay-icon">🧡</div>ShopeePay</div>
+    </div>
+
+    <button class="btn-order" id="orderBtn" onclick="placeOrder()" disabled>Bayar & Order Sekarang</button>
+
+    <div class="guarantee">
+      <span style="font-size:1.5rem">🛡️</span>
+      <div><strong>Dijamin Masuk 100%</strong><span>Uang kembali penuh jika gagal masuk ke akun kamu</span></div>
+    </div>
+
+    <!-- CEK STATUS -->
+    <div style="margin-top:1.5rem">
+      <p class="sec-lbl">Cek Status Pesanan</p>
+      <div class="cek-card">
+        <p>Sudah punya ID pesanan? Masukkan untuk cek status.</p>
+        <div class="cek-row">
+          <input class="cek-input" type="text" id="cekIdInput" placeholder="Contoh: A1B2C3D4E5F6" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+          <button class="btn-cek" onclick="cekStatus()">Cek</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ PAYMENT PAGE ============ -->
+<div id="payPage">
+  <div class="page-header">
+    <button class="back-btn" onclick="goToStore()">←</button>
+    <span class="page-header-title">Instruksi Pembayaran</span>
+  </div>
+  <div class="page-main fade-up">
+    <div class="pay-amount-card">
+      <div class="pay-amount-lbl">Total Pembayaran</div>
+      <div class="pay-amount-num" id="payAmountNum">Rp 0</div>
+      <div class="pay-amount-sub" id="payAmountSub">—</div>
+    </div>
+    <div class="timer-card">
+      <span class="timer-lbl">⏰ Bayar dalam</span>
+      <span class="timer-val" id="timerVal">14:59</span>
+    </div>
+    <div class="va-box">
+      <div class="va-lbl" id="vaLabel">Nomor Virtual Account</div>
+      <div class="va-number" id="vaNumber">—</div>
+      <button class="va-copy-btn" onclick="copyVA()">📋 Salin Nomor</button>
+    </div>
+    <div class="pay-detail-card">
+      <div class="pay-row"><span class="pay-row-lbl">Game Pass</span><span class="pay-row-val" id="payPass">—</span></div>
+      <div class="pay-row"><span class="pay-row-lbl">Username</span><span class="pay-row-val" id="payUsername">—</span></div>
+      <div class="pay-row"><span class="pay-row-lbl">Metode</span><span class="pay-row-val" id="payMethod">—</span></div>
+      <div class="pay-row"><span class="pay-row-lbl">ID Pesanan</span><span class="pay-row-val green" id="payOrderId">—</span></div>
+    </div>
+    <button class="btn-paid" id="btnPaid" onclick="confirmPaid()">✅ Saya Sudah Bayar</button>
+    <p style="text-align:center;font-size:0.7rem;color:var(--muted)">Sistem akan otomatis verifikasi pembayaran via Duitku</p>
+  </div>
+</div>
+
+<!-- ============ TRANSACTION PAGE ============ -->
+<div id="txPage">
+  <div class="page-header">
+    <button class="back-btn" onclick="goToStore()">←</button>
+    <span class="page-header-title">Detail Transaksi</span>
+  </div>
+  <div class="tx-main fade-up">
+    <div class="status-card">
+      <div class="prog-bar" id="progBar">
+        <div class="prog-seg done"></div>
+        <div class="prog-seg done"></div>
+        <div class="prog-seg" id="seg3"></div>
+        <div class="prog-seg" id="seg4"></div>
+      </div>
+      <div class="status-main">
+        <div class="status-icon" id="statusIcon">⏳</div>
+        <div>
+          <div class="status-lbl">Status Transaksi</div>
+          <div class="status-val" id="statusVal">DISIAPKAN</div>
+          <div class="status-sub" id="statusSub">Gamepass sedang disiapkan admin</div>
+        </div>
+      </div>
+      <div class="timeline" id="timeline"></div>
+      <div class="schedule-row">
+        <span>📅 Jadwal Terdekat</span>
+        <span id="scheduleTime">—</span>
+      </div>
+    </div>
+
+    <div class="tx-detail-card">
+      <div class="tx-row"><span class="tx-row-lbl">ID Pesanan</span><span class="tx-id-val" id="txIdVal">—<button class="copy-id-btn" onclick="copyTxId()">SALIN</button></span></div>
+      <div class="tx-row"><span class="tx-row-lbl">Tanggal</span><span class="tx-row-val" id="txDate">—</span></div>
+      <div class="tx-row"><span class="tx-row-lbl">Game Pass</span><span class="tx-row-val" id="txPass">—</span></div>
+      <div class="tx-row"><span class="tx-row-lbl">Username</span><span class="tx-row-val" id="txUsername">—</span></div>
+      <div class="tx-row"><span class="tx-row-lbl">Total Bayar</span><span class="tx-row-val" style="color:var(--g);font-family:var(--font-bold);font-weight:800" id="txTotal">—</span></div>
+    </div>
+
+    <div class="secure-badge">
+      <div class="secure-icon">🔒</div>
+      <div><strong>Pasti Masuk & Terkirim 100%</strong><small>Transaksi aman dijamin oleh sistem kami</small></div>
+    </div>
+
+    <div class="guide-card">
+      <div class="guide-hd open" id="guideHd" onclick="toggleGuide()">
+        <span>❓ Panduan Pengambilan Gamepass</span>
+        <span class="guide-chev">▼</span>
+      </div>
+      <div class="guide-body open" id="guideBody">
+        <div class="g-step"><div class="g-num">1</div><div class="g-text">Tunggu hingga status berubah jadi <strong>"SIAP DIAMBIL"</strong> — kamu akan dihubungi via WhatsApp.</div></div>
+        <div class="g-step"><div class="g-num">2</div><div class="g-text">Buka game <strong>CDID di Roblox</strong>, masuk ke menu Store atau Game Pass.</div></div>
+        <div class="g-step"><div class="g-num">3</div><div class="g-text">Game pass otomatis muncul di inventory. Langsung bisa dipakai!</div></div>
+        <div class="g-step"><div class="g-num">4</div><div class="g-text">Jika dalam <strong>2 jam setelah jadwal</strong> belum masuk, hubungi kami via WhatsApp.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<a class="wa-fab" href="https://wa.me/6281234567890" target="_blank">💬</a>
+
+<script>
+// ============================================================
+// ⚙️  KONFIGURASI SUPABASE — ISI SETELAH DAFTAR
+// ============================================================
+const SUPABASE_URL = 'GANTI_DENGAN_PROJECT_URL';       // contoh: https://abcxyz.supabase.co
+const SUPABASE_ANON_KEY = 'GANTI_DENGAN_ANON_KEY';    // dari Settings > API
+
+// Nomor WA admin (ganti!)
+const ADMIN_WA = '6281234567890';
+// ============================================================
+
+const sb = () => ({ url: SUPABASE_URL, key: SUPABASE_ANON_KEY });
+
+async function sbFetch(path, opts = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...opts,
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': opts.prefer || '',
+      ...(opts.headers || {}),
+    },
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function insertTx(data) {
+  return sbFetch('transactions', {
+    method: 'POST',
+    prefer: 'return=representation',
+    body: JSON.stringify(data),
+  });
+}
+
+async function getTx(id) {
+  const res = await sbFetch(`transactions?id=eq.${id}&select=*`);
+  return res && res[0];
+}
+
+async function updateTx(id, data) {
+  return sbFetch(`transactions?id=eq.${id}`, {
+    method: 'PATCH',
+    prefer: 'return=representation',
+    body: JSON.stringify(data),
+  });
+}
+
+// ============ PASSES ============
+const passes = [
+  { id:'luxury',    name:'Luxury Car Pass',       desc:'Buka semua mobil mewah & supercar',    icon:'🏎️', robux:259, price:45000, hot:true  },
+  { id:'rare',      name:'Rare Import Pass',       desc:'Mobil langka & rare imports',          icon:'🚘', robux:189, price:33000, hot:false },
+  { id:'retro',     name:'Retro Car Pass',         desc:'Mobil-mobil tua & klasik',             icon:'🚗', robux:169, price:29000, hot:false },
+  { id:'emergency', name:'Emergency Vehicle Pass', desc:'Ambulans, polisi, strobo',             icon:'🚨', robux:149, price:26000, hot:false },
+  { id:'modif',     name:'Advanced Modification',  desc:'Fitur modifikasi lanjutan',            icon:'🔧', robux:99,  price:17000, hot:false },
+  { id:'slot',      name:'Additional Car Slot',    desc:'Tambah slot garasi kamu',              icon:'🅿️', robux:49,  price:9000,  hot:false },
+];
+const iconBg = { luxury:'#fef9c3', rare:'#dbeafe', retro:'#ede9fe', emergency:'#fee2e2', modif:'#d1fae5', slot:'#fce7f3' };
+const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+
+let selPass = null, selMethod = null, currentTxId = null, timerInterval = null;
+
+function fmt(n) { return 'Rp ' + n.toLocaleString('id-ID'); }
+function pad(n) { return String(n).padStart(2,'0'); }
+function nowStr() {
+  const d = new Date();
+  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()} • ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function getSchedule() {
+  const now = new Date(); now.setHours(now.getHours() + 1, 0, 0, 0);
+  const end = new Date(now); end.setHours(end.getHours() + 2);
+  return `${now.getDate()} ${MONTHS[now.getMonth()]} pukul ${pad(now.getHours())}:00–${pad(end.getHours())}:00`;
+}
+function genId() {
+  return [...Array(12)].map(() => '0123456789ABCDEF'[Math.floor(Math.random()*16)]).join('');
+}
+function genVA() {
+  const pre = { 'DANA':'88810','GoPay':'99410','OVO':'11510','Transfer Bank':'01430','QRIS':'93300','ShopeePay':'93400' };
+  return (pre[selMethod]||'88800') + Math.floor(Math.random()*9999999999).toString().padStart(10,'0');
+}
+
+function showLoading(text='Memproses...') { document.getElementById('loadingText').textContent = text; document.getElementById('loadingOverlay').classList.add('show'); }
+function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+function showToast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ============ TICKER ============
+function initTicker() {
+  const items = ['Luxury Car Pass terjual','Emergency Vehicle Pass terjual','Retro Car Pass terjual','Rare Import Pass terjual','Additional Car Slot terjual','Advanced Modification terjual'];
+  const html = [...items,...items].map(t => `<span>${t}</span>`).join('');
+  document.getElementById('tickerInner').innerHTML = html;
+}
+
+// ============ RENDER PASSES ============
+function renderPasses() {
+  document.getElementById('passList').innerHTML = passes.map(p => `
+    <div class="pass-card" id="pc-${p.id}" onclick="selectPass('${p.id}')">
+      ${p.hot ? '<div class="hot-badge">🔥 TERLARIS</div>' : ''}
+      <div class="pass-icon" style="background:${iconBg[p.id]}">${p.icon}</div>
+      <div class="pass-info"><div class="pass-name">${p.name}</div><div class="pass-desc">${p.desc}</div></div>
+      <div class="pass-right"><div class="pass-robux">${p.robux} Robux</div><div class="pass-price">${fmt(p.price)}</div></div>
+      <div class="pass-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>
+    </div>`).join('');
+}
+
+function selectPass(id) {
+  passes.forEach(p => document.getElementById('pc-'+p.id).classList.remove('selected'));
+  document.getElementById('pc-'+id).classList.add('selected');
+  selPass = passes.find(p => p.id === id);
+  updateSummary();
+}
+function selectMethod(el) {
+  document.querySelectorAll('.pay-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  selMethod = el.dataset.method;
+  updateSummary();
+}
+function updateSummary() {
+  const u = document.getElementById('usernameInput').value.trim();
+  if (selPass) { document.getElementById('sumPass').textContent = selPass.name; document.getElementById('sumTotal').textContent = fmt(selPass.price); }
+  document.getElementById('sumUser').textContent = u || '—';
+  document.getElementById('sumMethod').textContent = selMethod || '—';
+  if (selPass && u) document.getElementById('summary').classList.add('show');
+  document.getElementById('orderBtn').disabled = !(selPass && u && selMethod);
+}
+
+// ============ ORDER ============
+async function placeOrder() {
+  const btn = document.getElementById('orderBtn');
+  const uname = document.getElementById('usernameInput').value.trim();
+  btn.innerHTML = '<span class="spinner">⏳</span> Memproses...';
+  btn.disabled = true;
+
+  const txId = genId();
+  currentTxId = txId;
+
+  const txData = {
+    id: txId,
+    pass_name: selPass.name,
+    pass_id: selPass.id,
+    username: uname,
+    method: selMethod,
+    price: selPass.price,
+    status: 'menunggu_bayar',
+    schedule: getSchedule(),
+    created_at: new Date().toISOString(),
+  };
+
+  try {
+    if (SUPABASE_URL !== 'GANTI_DENGAN_PROJECT_URL') {
+      await insertTx(txData);
+    } else {
+      // Mode demo: simpan ke localStorage
+      const all = JSON.parse(localStorage.getItem('ngebut_tx') || '[]');
+      all.unshift(txData);
+      localStorage.setItem('ngebut_tx', JSON.stringify(all));
+    }
+    showPayPage(txId, uname);
+  } catch(e) {
+    showToast('❌ Gagal membuat pesanan. Coba lagi.');
+    console.error(e);
+  }
+
+  btn.innerHTML = 'Bayar & Order Sekarang';
+  btn.disabled = false;
+}
+
+function showPayPage(txId, uname) {
+  showPage('payPage');
+  document.getElementById('payAmountNum').textContent = fmt(selPass.price);
+  document.getElementById('payAmountSub').textContent = selPass.name + ' · @' + uname;
+  document.getElementById('payPass').textContent = selPass.name;
+  document.getElementById('payUsername').textContent = uname;
+  document.getElementById('payMethod').textContent = selMethod;
+  document.getElementById('payOrderId').textContent = txId;
+  document.getElementById('vaLabel').textContent = selMethod === 'QRIS' ? 'Kode QRIS' : 'Nomor Virtual Account';
+  document.getElementById('vaNumber').textContent = genVA();
+  startTimer(15 * 60);
+}
+
+function startTimer(seconds) {
+  clearInterval(timerInterval);
+  let rem = seconds;
+  const tick = () => {
+    document.getElementById('timerVal').textContent = `${pad(Math.floor(rem/60))}:${pad(rem%60)}`;
+    if (rem-- <= 0) { clearInterval(timerInterval); document.getElementById('timerVal').textContent = 'KADALUARSA'; }
+  };
+  tick(); timerInterval = setInterval(tick, 1000);
+}
+
+function copyVA() {
+  try{navigator.clipboard.writeText(document.getElementById('vaNumber').textContent);}catch(e){}
+  const b = document.querySelector('.va-copy-btn');
+  b.textContent = '✅ Tersalin!'; setTimeout(() => b.textContent = '📋 Salin Nomor', 1500);
+}
+
+async function confirmPaid() {
+  const btn = document.getElementById('btnPaid');
+  btn.textContent = '⏳ Memverifikasi...'; btn.disabled = true;
+  clearInterval(timerInterval);
+
+  try {
+    const now = new Date().toISOString();
+    if (SUPABASE_URL !== 'GANTI_DENGAN_PROJECT_URL') {
+      await updateTx(currentTxId, { status: 'disiapkan', paid_at: now });
+      const tx = await getTx(currentTxId);
+      showTxPage(tx);
+    } else {
+      // Mode demo
+      const all = JSON.parse(localStorage.getItem('ngebut_tx') || '[]');
+      const idx = all.findIndex(t => t.id === currentTxId);
+      if (idx >= 0) { all[idx].status = 'disiapkan'; all[idx].paid_at = now; localStorage.setItem('ngebut_tx', JSON.stringify(all)); }
+      showTxPage(all[idx]);
+    }
+  } catch(e) {
+    showToast('❌ Gagal verifikasi. Hubungi admin via WA.');
+    console.error(e);
+  }
+  btn.textContent = '✅ Saya Sudah Bayar'; btn.disabled = false;
+}
+
+// ============ TX PAGE ============
+function showTxPage(tx) {
+  showPage('txPage');
+  currentTxId = tx.id;
+  document.getElementById('txIdVal').childNodes[0].textContent = tx.id + ' ';
+  document.getElementById('txDate').textContent = formatDate(tx.created_at);
+  document.getElementById('txPass').textContent = tx.pass_name;
+  document.getElementById('txUsername').textContent = tx.username;
+  document.getElementById('txTotal').textContent = fmt(tx.price);
+  document.getElementById('scheduleTime').textContent = tx.schedule || '—';
+  renderStatus(tx);
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  // If already formatted string
+  if (iso.includes('•')) return iso;
+  const d = new Date(iso);
+  return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()} • ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function renderStatus(tx) {
+  const s = tx.status;
+  const paid_at = tx.paid_at ? formatDate(tx.paid_at) : '';
+  const ready_at = tx.ready_at ? formatDate(tx.ready_at) : '';
+  const done_at = tx.done_at ? formatDate(tx.done_at) : '';
+
+  const cfg = {
+    disiapkan: {
+      icon:'⏳', val:'DISIAPKAN (Langkah 2/4)', sub:'Gamepass sedang disiapkan admin',
+      segs:[1,1,0,0],
+      tl:[
+        {state:'done',  label:'BAYAR',       time: paid_at, desc:''},
+        {state:'active',label:'DISIAPKAN',   time: paid_at, desc:'Gamepass sedang disiapkan dan dapat diklaim sesuai jadwal'},
+        {state:'pending',label:'SIAP DIAMBIL',time:'',      desc:'Menunggu admin...'},
+        {state:'pending',label:'SELESAI',    time:'',       desc:''},
+      ]
+    },
+    siap_diambil: {
+      icon:'🎯', val:'SIAP DIAMBIL (Langkah 3/4)', sub:'Ikuti panduan di bawah untuk mengambil gamepass',
+      segs:[1,1,1,0],
+      tl:[
+        {state:'done', label:'BAYAR',        time: paid_at,  desc:''},
+        {state:'done', label:'DISIAPKAN',    time: paid_at,  desc:''},
+        {state:'active',label:'SIAP DIAMBIL',time: ready_at, desc:'Buka CDID di Roblox → menu Store → ambil gamepass'},
+        {state:'pending',label:'SELESAI',    time:'',        desc:''},
+      ]
+    },
+    selesai: {
+      icon:'✅', val:'SELESAI', sub:'Gamepass sudah berhasil masuk ke akun kamu!',
+      segs:[1,1,1,1],
+      tl:[
+        {state:'done',label:'BAYAR',        time: paid_at, desc:''},
+        {state:'done',label:'DISIAPKAN',    time: paid_at, desc:''},
+        {state:'done',label:'SIAP DIAMBIL', time: ready_at,desc:''},
+        {state:'done',label:'SELESAI',      time: done_at, desc:'Transaksi selesai. Terima kasih!'},
+      ]
+    },
+  }[s] || {
+    icon:'⏳', val:'DISIAPKAN (Langkah 2/4)', sub:'Gamepass sedang disiapkan admin',
+    segs:[1,1,0,0],
+    tl:[
+      {state:'done',label:'BAYAR',time:paid_at,desc:''},
+      {state:'active',label:'DISIAPKAN',time:paid_at,desc:'Gamepass sedang disiapkan'},
+      {state:'pending',label:'SIAP DIAMBIL',time:'',desc:''},
+      {state:'pending',label:'SELESAI',time:'',desc:''},
+    ]
+  };
+
+  document.getElementById('statusIcon').textContent = cfg.icon;
+  document.getElementById('statusVal').textContent = cfg.val;
+  document.getElementById('statusSub').textContent = cfg.sub;
+
+  document.querySelectorAll('.prog-seg').forEach((seg, i) => {
+    seg.className = 'prog-seg' + (cfg.segs[i] === 1 ? ' done' : '');
+  });
+
+  document.getElementById('timeline').innerHTML = cfg.tl.map(t => `
+    <div class="tl-item">
+      <div class="tl-dot ${t.state}">
+        ${t.state==='done'?'<svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>':''}
+      </div>
+      <div>
+        <div class="tl-stat ${t.state}">${t.label}</div>
+        ${t.time?`<div class="tl-time">${t.time}</div>`:''}
+        ${t.desc?`<div class="tl-desc">${t.desc}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+// ============ CEK STATUS ============
+async function cekStatus() {
+  const id = document.getElementById('cekIdInput').value.trim().toUpperCase();
+  if (!id) return showToast('Masukkan ID pesanan dulu');
+
+  showLoading('Mencari pesanan...');
+  try {
+    let tx;
+    if (SUPABASE_URL !== 'GANTI_DENGAN_PROJECT_URL') {
+      tx = await getTx(id);
+    } else {
+      const all = JSON.parse(localStorage.getItem('ngebut_tx') || '[]');
+      tx = all.find(t => t.id === id);
+    }
+
+    hideLoading();
+    if (!tx) { showToast('❌ ID pesanan tidak ditemukan'); return; }
+
+    // Reconstruct selPass for fmt
+    selPass = passes.find(p => p.id === tx.pass_id) || { name: tx.pass_name, price: tx.price };
+    currentTxId = tx.id;
+    showTxPage(tx);
+  } catch(e) {
+    hideLoading();
+    showToast('❌ Gagal mengambil data. Coba lagi.');
+    console.error(e);
+  }
+}
+
+// ============ HELPERS ============
+function showPage(id) {
+  ['storePage','payPage','txPage'].forEach(p => document.getElementById(p).style.display = p===id?'block':'none');
+  window.scrollTo(0,0);
+}
+function goToStore() { showPage('storePage'); }
+function copyTxId() {
+  try{navigator.clipboard.writeText(currentTxId || '');}catch(e){}
+  const b = document.querySelector('.copy-id-btn');
+  b.textContent='✓'; setTimeout(()=>b.textContent='SALIN',1500);
+}
+function toggleGuide() {
+  document.getElementById('guideHd').classList.toggle('open');
+  document.getElementById('guideBody').classList.toggle('open');
+}
+
+// ============ INIT ============
+renderPasses();
+initTicker();
+
+// Cek query param ?tx=ID (untuk return dari Duitku nanti)
+const urlParams = new URLSearchParams(window.location.search);
+const txParam = urlParams.get('tx');
+if (txParam) {
+  document.getElementById('cekIdInput').value = txParam;
+  cekStatus();
+}
+</script>
+</body>
+</html>

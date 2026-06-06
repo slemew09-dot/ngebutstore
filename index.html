@@ -12,7 +12,7 @@
   --border:#e2e8f0;--r:16px;--rs:10px;--font:'Nunito',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;-webkit-tap-highlight-color:transparent;padding-bottom:env(safe-area-inset-bottom,0px);}
 
 /* NAV */
 nav{background:#fff;border-bottom:1px solid var(--border);padding:0 1.1rem;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 1px 6px rgba(0,0,0,0.05);}
@@ -94,7 +94,7 @@ input.uname-field::placeholder{color:#cbd5e1;font-weight:400;}
 .note-input:focus{border-color:var(--p);}
 
 /* BOTTOM BAR */
-.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:0.8rem 1rem;display:flex;align-items:center;justify-content:space-between;z-index:100;}
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:0.8rem 1rem calc(0.8rem + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;z-index:100;}
 .bottom-total-lbl{font-size:0.72rem;color:var(--muted);}
 .bottom-total-num{font-weight:900;font-size:1.05rem;color:var(--text);}
 .btn-cart{width:46px;height:46px;border:1.5px solid var(--border);border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;flex-shrink:0;}
@@ -163,7 +163,7 @@ input.uname-field::placeholder{color:#cbd5e1;font-weight:400;}
 .garansi-pill{display:inline-flex;align-items:center;gap:5px;background:#dcfce7;border:1px solid #86efac;color:#166534;font-size:0.7rem;font-weight:800;padding:5px 12px;border-radius:20px;margin-top:10px;}
 
 /* Bottom bar checkout */
-.co-bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:0.8rem 1rem;z-index:100;}
+.co-bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:0.8rem 1rem calc(0.8rem + env(safe-area-inset-bottom,0px));z-index:100;}
 .co-bottom-inner{max-width:460px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .co-total-lbl{font-size:0.72rem;color:var(--muted);}
 .co-total-num{font-weight:900;font-size:1.05rem;}
@@ -307,13 +307,8 @@ input.uname-field::placeholder{color:#cbd5e1;font-weight:400;}
   </nav>
   <div class="hero">
     <div class="hero-badge">🏎️ Car Driving Indonesia</div>
-    <h1>Game Pass <span>CDID</span><br>Harga Termurah</h1>
-    <p>Proses instan · Dijamin masuk · 100% Aman</p>
-    <div class="hero-stats">
-      <div><div class="stat-n">4.9⭐</div><div class="stat-l">Rating</div></div>
-      <div><div class="stat-n">3.100+</div><div class="stat-l">Terjual</div></div>
-      <div><div class="stat-n">100%</div><div class="stat-l">Garansi</div></div>
-    </div>
+    <h1>Mau Ngebut di <span>CDID?</span><br>Lengkapin Pass Kamu!</h1>
+    <p>⚡ Proses Instan &nbsp;·&nbsp; 🔒 100% Aman &nbsp;·&nbsp; 🌏 Se-Asia CDID</p>
   </div>
   <div class="ticker"><div class="ticker-inner" id="tickerInner"></div></div>
   <main>
@@ -530,7 +525,7 @@ input.uname-field::placeholder{color:#cbd5e1;font-weight:400;}
   </div>
 </div>
 
-<a class="wa-fab" href="https://wa.me/6283199803391" target="_blank">💬</a>
+<a class="wa-fab" href="https://wa.me/6283842700877" target="_blank">💬</a>
 
 <script>
 // ============================================================
@@ -539,12 +534,12 @@ const SUPABASE_ANON_KEY = 'GANTI_DENGAN_ANON_KEY';
 // ============================================================
 
 const passes = [
-  {id:'luxury',    name:'Luxury Car Pass',       desc:'Semua mobil mewah & supercar',   icon:'🏎️', bg:'#fef9c3', robux:259, price:45000, hot:true},
-  {id:'rare',      name:'Rare Import Pass',       desc:'Mobil langka & rare imports',    icon:'🚘', bg:'#dbeafe', robux:189, price:33000, hot:false},
-  {id:'retro',     name:'Retro Car Pass',         desc:'Mobil-mobil tua & klasik',       icon:'🚗', bg:'#ede9fe', robux:169, price:29000, hot:false},
-  {id:'emergency', name:'Emergency Vehicle Pass', desc:'Ambulans, polisi, strobo',       icon:'🚨', bg:'#fee2e2', robux:149, price:26000, hot:false},
-  {id:'modif',     name:'Advanced Modification',  desc:'Fitur modifikasi lanjutan',      icon:'🔧', bg:'#dcfce7', robux:99,  price:17000, hot:false},
-  {id:'slot',      name:'Additional Car Slot',    desc:'Tambah slot garasi kamu',        icon:'🅿️', bg:'#fce7f3', robux:49,  price:9000,  hot:false},
+  {id:'luxury',    name:'Luxury Car Pass',       desc:'Semua mobil mewah & supercar',   icon:'🏎️', bg:'#fef9c3', img:'https://tr.rbxcdn.com/180DAY-52c57a4b6ed2267d29564948d1b59360/150/150/Image/Webp/noFilter', robux:259, price:45000, hot:true},
+  {id:'rare',      name:'Rare Import Pass',       desc:'Mobil langka & rare imports',    icon:'🚘', bg:'#dbeafe', img:'https://tr.rbxcdn.com/180DAY-c45e71eb37d11c1111335a7cbf6d65ae/150/150/Image/Webp/noFilter', robux:189, price:33000, hot:false},
+  {id:'retro',     name:'Retro Car Pass',         desc:'Mobil-mobil tua & klasik',       icon:'🚗', bg:'#ede9fe', img:'https://tr.rbxcdn.com/180DAY-238b2200c5f010b224311bf329510798/150/150/Image/Webp/noFilter', robux:169, price:29000, hot:false},
+  {id:'emergency', name:'Emergency Vehicle Pass', desc:'Ambulans, polisi, strobo',       icon:'🚨', bg:'#fee2e2', img:'', robux:149, price:26000, hot:false},
+  {id:'modif',     name:'Advanced Modification',  desc:'Fitur modifikasi lanjutan',      icon:'🔧', bg:'#dcfce7', img:'https://tr.rbxcdn.com/180DAY-c23a4915831ccd8339485d5e77ea5380/150/150/Image/Webp/noFilter', robux:99,  price:17000, hot:false},
+  {id:'slot',      name:'Additional Car Slot',    desc:'Tambah slot garasi kamu',        icon:'🅿️', bg:'#fce7f3', img:'https://tr.rbxcdn.com/180DAY-b4e40a3bf30ba52e0abefa3e07347a1a/150/150/Image/Webp/noFilter', robux:49,  price:9000,  hot:false},
 ];
 
 const methods = {
@@ -588,7 +583,7 @@ function showPage(id){
 
 // TICKER
 function initTicker(){
-  const items=['Luxury Car Pass terjual','Emergency Vehicle Pass terjual','Retro Car Pass terjual','Rare Import Pass terjual','Additional Car Slot terjual','Advanced Modification terjual'];
+  const items=['⚡ Proses Super Cepat','🔒 Transaksi 100% Aman','🏎️ Game Pass CDID Termurah','✅ Dijamin Masuk ke Akun','🇮🇩 Dipercaya Pemain CDID Indonesia','💬 CS Siap Bantu 24 Jam'];
   document.getElementById('tickerInner').innerHTML=[...items,...items].map(t=>`<span>${t}</span>`).join('');
 }
 
@@ -597,7 +592,9 @@ function renderPasses(){
   document.getElementById('passList').innerHTML=passes.map(p=>`
     <div class="pass-card" onclick="openPassPage('${p.id}')">
       ${p.hot?'<div class="hot">🔥 TERLARIS</div>':''}
-      <div class="pass-icon" style="background:${p.bg}">${p.icon}</div>
+      <div class="pass-icon" style="background:${p.bg};overflow:hidden;padding:${p.img?'0':''}">
+        ${p.img ? `<img src="${p.img}" style="width:44px;height:44px;object-fit:cover;border-radius:11px;" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><span style="display:none;font-size:1.3rem;width:100%;height:100%;align-items:center;justify-content:center;">${p.icon}</span>` : p.icon}
+      </div>
       <div class="pass-info"><div class="pass-name">${p.name}</div><div class="pass-desc">${p.desc}</div></div>
       <div class="pass-right"><div class="pass-rbx">${p.robux} Robux</div><div class="pass-price">${fmt(p.price)}</div></div>
       <span class="arr">›</span>

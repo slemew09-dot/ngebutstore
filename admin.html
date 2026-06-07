@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>NgebutStore — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p:#2563eb;--pd:#1d4ed8;--ps:#eff6ff;--pbr:#bfdbfe;
+  --bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;
+  --border:#e2e8f0;--r:14px;--rs:10px;--font:'Nunito',sans-serif;
+  --green:#16a34a;--yellow:#d97706;--red:#dc2626;--blue:#2563eb;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* LOGIN */
+#loginPage{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem;}
+.login-card{background:#fff;border-radius:20px;padding:2rem 1.5rem;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(37,99,235,0.1);}
+.login-logo{text-align:center;margin-bottom:1.5rem;}
+.login-logo-icon{width:60px;height:60px;background:var(--p);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 10px;}
+.login-logo-name{font-weight:900;font-size:1.2rem;color:var(--p);}
+.login-logo-sub{font-size:0.72rem;color:var(--muted);}
+.login-lbl{font-size:0.78rem;font-weight:800;color:var(--text);margin-bottom:5px;}
+.login-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:var(--font);font-size:0.88rem;outline:none;margin-bottom:0.8rem;transition:border-color 0.15s;}
+.login-input:focus{border-color:var(--p);}
+.btn-login{width:100%;background:var(--p);color:#fff;border:none;border-radius:var(--rs);padding:13px;font-family:var(--font);font-size:0.95rem;font-weight:800;cursor:pointer;margin-top:4px;}
+.login-err{color:var(--red);font-size:0.75rem;text-align:center;margin-top:8px;display:none;}
+
+/* ADMIN LAYOUT */
+#adminPage{display:none;}
+.admin-nav{background:linear-gradient(135deg,#0f1e4a,#1d4ed8);padding:0 1rem;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.admin-logo{font-weight:900;font-size:1rem;color:#fff;display:flex;align-items:center;gap:8px;}
+.admin-logo-icon{width:26px;height:26px;background:rgba(255,255,255,0.2);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;}
+.admin-badge{background:rgba(255,255,255,0.15);color:#bfdbfe;font-size:9px;font-weight:800;padding:3px 9px;border-radius:20px;}
+.btn-logout{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:0.72rem;font-weight:800;padding:5px 12px;border-radius:20px;cursor:pointer;font-family:var(--font);}
+
+.admin-body{max-width:500px;margin:0 auto;padding:1rem 1rem 5rem;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
+.stat-card{background:#fff;border-radius:var(--r);padding:0.9rem;border:1px solid var(--border);}
+.stat-val{font-weight:900;font-size:1.4rem;margin-bottom:2px;}
+.stat-lbl{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;}
+.stat-card.blue .stat-val{color:var(--blue);}
+.stat-card.yellow .stat-val{color:var(--yellow);}
+.stat-card.green .stat-val{color:var(--green);}
+.stat-card.red .stat-val{color:var(--red);}
+
+/* FILTER TABS */
+.filter-tabs{display:flex;gap:6px;margin-bottom:1rem;overflow-x:auto;padding-bottom:2px;}
+.filter-tab{background:#fff;border:1.5px solid var(--border);border-radius:20px;padding:6px 14px;font-size:0.75rem;font-weight:800;cursor:pointer;white-space:nowrap;transition:all 0.14s;font-family:var(--font);}
+.filter-tab.active{background:var(--p);border-color:var(--p);color:#fff;}
+
+/* ORDER CARDS */
+.orders-list{display:flex;flex-direction:column;gap:10px;}
+.order-card{background:#fff;border-radius:var(--r);border:1px solid var(--border);overflow:hidden;}
+.order-card-head{padding:0.85rem 1rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.order-id{font-family:monospace;font-size:0.78rem;font-weight:700;color:var(--p);}
+.order-time{font-size:0.68rem;color:var(--muted);}
+.status-badge{font-size:0.68rem;font-weight:800;padding:4px 10px;border-radius:20px;text-transform:uppercase;}
+.status-badge.menunggu_bayar{background:#fef9c3;color:#92400e;}
+.status-badge.disiapkan{background:#dbeafe;color:#1d4ed8;}
+.status-badge.siap_diambil{background:#dcfce7;color:#15803d;}
+.status-badge.selesai{background:#f0fdf4;color:#166534;border:1px solid #86efac;}
+.status-badge.dibatalkan{background:#fee2e2;color:#991b1b;}
+.order-card-body{padding:0.85rem 1rem;}
+.order-info-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.order-pass-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.order-pass-name{font-weight:800;font-size:0.85rem;}
+.order-username{font-size:0.75rem;color:var(--muted);}
+.order-meta{display:flex;gap:12px;margin-bottom:10px;}
+.order-meta-item{font-size:0.72rem;}
+.order-meta-lbl{color:var(--muted);margin-bottom:1px;}
+.order-meta-val{font-weight:700;}
+.order-meta-val.price{color:var(--p);font-size:0.82rem;}
+.order-actions{display:flex;gap:7px;flex-wrap:wrap;}
+.btn-action{padding:7px 14px;border-radius:var(--rs);font-size:0.72rem;font-weight:800;cursor:pointer;border:none;font-family:var(--font);transition:all 0.13s;}
+.btn-action:active{transform:scale(0.96);}
+.btn-siapkan{background:#dbeafe;color:#1d4ed8;}
+.btn-ready{background:#dcfce7;color:#15803d;}
+.btn-selesai{background:#f0fdf4;color:#166534;border:1px solid #86efac;}
+.btn-cancel{background:#fee2e2;color:#991b1b;}
+.btn-wa{background:#25d366;color:#fff;}
+.btn-copy{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--muted);}
+.empty-icon{font-size:2.5rem;margin-bottom:0.5rem;}
+.empty-text{font-size:0.82rem;}
+
+/* SEARCH */
+.search-wrap{position:relative;margin-bottom:1rem;}
+.search-input{width:100%;padding:10px 14px 10px 38px;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:0.85rem;outline:none;background:#fff;transition:border-color 0.15s;}
+.search-input:focus{border-color:var(--p);}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:1rem;color:var(--muted);}
+
+/* REFRESH BTN */
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;}
+.top-bar-title{font-weight:900;font-size:0.9rem;}
+.btn-refresh{background:#fff;border:1.5px solid var(--border);border-radius:var(--rs);padding:6px 12px;font-size:0.72rem;font-weight:800;cursor:pointer;font-family:var(--font);display:flex;align-items:center;gap:5px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(60px);background:#0f172a;color:#fff;padding:10px 20px;border-radius:20px;font-size:0.78rem;font-weight:700;z-index:500;transition:transform 0.3s;white-space:nowrap;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* LOADING */
+.loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,255,255,0.85);z-index:400;align-items:center;justify-content:center;flex-direction:column;gap:10px;}
+.loading-overlay.show{display:flex;}
+.spinner{width:36px;height:36px;border:3px solid var(--pbr);border-top-color:var(--p);border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.fade-up{animation:fadeUp 0.25s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+.note-text{font-size:0.72rem;color:var(--muted);background:var(--bg);border-radius:6px;padding:5px 8px;margin-top:6px;font-style:italic;}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div><span style="font-size:0.8rem;color:var(--muted);font-weight:700;">Memuat...</span></div>
+<div class="toast" id="toast"></div>
+
+<!-- ===== LOGIN PAGE ===== -->
+<div id="loginPage">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">🚗</div>
+      <div class="login-logo-name">NgebutStore</div>
+      <div class="login-logo-sub">Admin Panel</div>
+    </div>
+    <div class="login-lbl">Username</div>
+    <input class="login-input" type="text" id="loginUser" placeholder="admin">
+    <div class="login-lbl">Password</div>
+    <input class="login-input" type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-login" onclick="doLogin()">Masuk ke Dashboard</button>
+    <div class="login-err" id="loginErr">Username atau password salah!</div>
+  </div>
+</div>
+
+<!-- ===== ADMIN PAGE ===== -->
+<div id="adminPage">
+  <div class="admin-nav">
+    <div class="admin-logo"><div class="admin-logo-icon">🚗</div>NgebutStore<span class="admin-badge">ADMIN</span></div>
+    <button class="btn-logout" onclick="doLogout()">Keluar</button>
+  </div>
+
+  <div class="admin-body fade-up">
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card blue"><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">Total Pesanan</div></div>
+      <div class="stat-card yellow"><div class="stat-val" id="statMenunggu">0</div><div class="stat-lbl">Menunggu Bayar</div></div>
+      <div class="stat-card blue"><div class="stat-val" id="statDisiapkan">0</div><div class="stat-lbl">Disiapkan</div></div>
+      <div class="stat-card green"><div class="stat-val" id="statSelesai">0</div><div class="stat-lbl">Selesai</div></div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" id="searchInput" placeholder="Cari username, ID pesanan..." oninput="filterOrders()">
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="setFilter('semua',this)">Semua</button>
+      <button class="filter-tab" onclick="setFilter('menunggu_bayar',this)">⏳ Menunggu</button>
+      <button class="filter-tab" onclick="setFilter('disiapkan',this)">🔧 Disiapkan</button>
+      <button class="filter-tab" onclick="setFilter('siap_diambil',this)">🎯 Siap Diambil</button>
+      <button class="filter-tab" onclick="setFilter('selesai',this)">✅ Selesai</button>
+    </div>
+
+    <!-- Top bar -->
+    <div class="top-bar">
+      <span class="top-bar-title" id="orderCountLabel">Semua Pesanan</span>
+      <button class="btn-refresh" onclick="loadOrders()">🔄 Refresh</button>
+    </div>
+
+    <!-- Orders list -->
+    <div class="orders-list" id="ordersList"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+const SUPABASE_URL = 'https://pyiymaudhpoefbragzbz.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_fXP6gYACqoKWzfyqI7rHiA_2TjhR9KK';
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'admin12'; // GANTI PASSWORD INI BRO!
+const ADMIN_WA = '6283842700877';
+// ============================================================
+
+const passIcons = {luxury:'🏎️',rare:'🚘',retro:'🚗',emergency:'🚨',modif:'🔧',slot:'🅿️'};
+const passBg = {luxury:'#fef9c3',rare:'#dbeafe',retro:'#ede9fe',emergency:'#fee2e2',modif:'#dcfce7',slot:'#fce7f3'};
+const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Ags','Sep','Okt','Nov','Des'];
+const pad = n=>String(n).padStart(2,'0');
+const fmt = n=>'Rp '+n.toLocaleString('id-ID');
+function fmtDate(iso){if(!iso)return'—';const d=new Date(iso);return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;}
+
+let allOrders = [], curFilter = 'semua';
+
+function showLoading(){document.getElementById('loadingOverlay').classList.add('show');}
+function hideLoading(){document.getElementById('loadingOverlay').classList.remove('show');}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// LOGIN
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(u===ADMIN_USER && p===ADMIN_PASS){
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('adminPage').style.display='block';
+    localStorage.setItem('ngebut_admin','1');
+    loadOrders();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+  }
+}
+function doLogout(){
+  localStorage.removeItem('ngebut_admin');
+  document.getElementById('adminPage').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('loginPass').value='';
+}
+
+// AUTO LOGIN
+if(localStorage.getItem('ngebut_admin')==='1'){
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('adminPage').style.display='block';
+  loadOrders();
+}
+
+// SUPABASE
+async function sbFetch(path,opts={}){
+  const res=await fetch(`${SUPABASE_URL}/rest/v1/${path}`,{
+    ...opts,
+    headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'Content-Type':'application/json','Prefer':opts.prefer||'',...(opts.headers||{})}
+  });
+  if(!res.ok)throw new Error(await res.text());
+  const t=await res.text();return t?JSON.parse(t):null;
+}
+async function sbUpdate(id,d){
+  return sbFetch(`transactions?id=eq.${id}`,{method:'PATCH',prefer:'return=representation',body:JSON.stringify(d)});
+}
+
+// LOAD ORDERS
+async function loadOrders(){
+  showLoading();
+  try{
+    const data = await sbFetch('transactions?select=*&order=created_at.desc');
+    allOrders = data||[];
+    updateStats();
+    renderOrders();
+  }catch(e){
+    // Fallback localStorage
+    allOrders = JSON.parse(localStorage.getItem('ngebut_tx')||'[]');
+    updateStats();
+    renderOrders();
+    showToast('⚠️ Mode offline — data dari localStorage');
+  }
+  hideLoading();
+}
+
+function updateStats(){
+  document.getElementById('statTotal').textContent = allOrders.length;
+  document.getElementById('statMenunggu').textContent = allOrders.filter(o=>o.status==='menunggu_bayar').length;
+  document.getElementById('statDisiapkan').textContent = allOrders.filter(o=>o.status==='disiapkan').length;
+  document.getElementById('statSelesai').textContent = allOrders.filter(o=>o.status==='selesai').length;
+}
+
+function setFilter(f, el){
+  curFilter=f;
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderOrders();
+}
+
+function filterOrders(){renderOrders();}
+
+function renderOrders(){
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  let filtered = allOrders.filter(o=>{
+    const matchFilter = curFilter==='semua' || o.status===curFilter;
+    const matchSearch = !search || o.username?.toLowerCase().includes(search) || o.id?.toLowerCase().includes(search) || o.pass_name?.toLowerCase().includes(search);
+    return matchFilter && matchSearch;
+  });
+
+  document.getElementById('orderCountLabel').textContent = `${filtered.length} Pesanan`;
+
+  if(filtered.length===0){
+    document.getElementById('ordersList').innerHTML=`
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <div class="empty-text">Belum ada pesanan</div>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('ordersList').innerHTML = filtered.map(o=>renderOrderCard(o)).join('');
+}
+
+function renderOrderCard(o){
+  const statusLabel={
+    menunggu_bayar:'⏳ Menunggu Bayar',
+    disiapkan:'🔧 Disiapkan',
+    siap_diambil:'🎯 Siap Diambil',
+    selesai:'✅ Selesai',
+    dibatalkan:'❌ Dibatalkan'
+  }[o.status]||o.status;
+
+  const actions = [];
+  if(o.status==='menunggu_bayar'){
+    actions.push(`<button class="btn-action btn-siapkan" onclick="updateStatus('${o.id}','disiapkan')">🔧 Siapkan</button>`);
+    actions.push(`<button class="btn-action btn-cancel" onclick="updateStatus('${o.id}','dibatalkan')">❌ Batalkan</button>`);
+  }
+  if(o.status==='disiapkan'){
+    actions.push(`<button class="btn-action btn-ready" onclick="updateStatus('${o.id}','siap_diambil')">🎯 Siap Diambil</button>`);
+  }
+  if(o.status==='siap_diambil'){
+    actions.push(`<button class="btn-action btn-selesai" onclick="updateStatus('${o.id}','selesai')">✅ Selesai</button>`);
+  }
+  actions.push(`<button class="btn-action btn-wa" onclick="hubungiWA('${o.username}','${o.pass_name}','${o.id}')">💬 WA</button>`);
+  actions.push(`<button class="btn-action btn-copy" onclick="copyId('${o.id}')">📋 ID</button>`);
+
+  return `
+    <div class="order-card" id="card-${o.id}">
+      <div class="order-card-head">
+        <div>
+          <div class="order-id">#${o.id}</div>
+          <div class="order-time">${fmtDate(o.created_at)}</div>
+        </div>
+        <span class="status-badge ${o.status}">${statusLabel}</span>
+      </div>
+      <div class="order-card-body">
+        <div class="order-info-row">
+          <div class="order-pass-icon" style="background:${passBg[o.pass_id]||'#f1f5f9'}">${passIcons[o.pass_id]||'🎮'}</div>
+          <div>
+            <div class="order-pass-name">${o.pass_name||'—'}</div>
+            <div class="order-username">👤 ${o.username||'—'}</div>
+          </div>
+        </div>
+        <div class="order-meta">
+          <div class="order-meta-item"><div class="order-meta-lbl">Total</div><div class="order-meta-val price">${fmt(o.price||0)}</div></div>
+          <div class="order-meta-item"><div class="order-meta-lbl">Metode</div><div class="order-meta-val">${o.method||'—'}</div></div>
+          <div class="order-meta-item"><div class="order-meta-lbl">Email</div><div class="order-meta-val">${o.email||'—'}</div></div>
+        </div>
+        ${o.note?`<div class="note-text">📝 ${o.note}</div>`:''}
+        <div class="order-actions">${actions.join('')}</div>
+      </div>
+    </div>`;
+}
+
+// UPDATE STATUS
+async function updateStatus(id, newStatus){
+  showLoading();
+  try{
+    const updateData={status:newStatus};
+    if(newStatus==='disiapkan') updateData.paid_at=new Date().toISOString();
+    if(newStatus==='siap_diambil') updateData.ready_at=new Date().toISOString();
+    if(newStatus==='selesai') updateData.done_at=new Date().toISOString();
+
+    await sbUpdate(id, updateData);
+    // Update local
+    const idx=allOrders.findIndex(o=>o.id===id);
+    if(idx>=0) Object.assign(allOrders[idx], updateData);
+    updateStats();
+    renderOrders();
+    showToast('✅ Status berhasil diupdate!');
+  }catch(e){
+    // localStorage fallback
+    const all=JSON.parse(localStorage.getItem('ngebut_tx')||'[]');
+    const idx=all.findIndex(o=>o.id===id);
+    if(idx>=0){
+      const updateData={status:newStatus};
+      if(newStatus==='disiapkan') updateData.paid_at=new Date().toISOString();
+      if(newStatus==='siap_diambil') updateData.ready_at=new Date().toISOString();
+      if(newStatus==='selesai') updateData.done_at=new Date().toISOString();
+      Object.assign(all[idx], updateData);
+      localStorage.setItem('ngebut_tx',JSON.stringify(all));
+      allOrders=all;
+    }
+    updateStats();
+    renderOrders();
+    showToast('✅ Status diupdate (offline)');
+  }
+  hideLoading();
+}
+
+function hubungiWA(username, passName, orderId){
+  const msg = `Halo *${username}*! 👋\n\nPesanan kamu di *NgebutStore* sudah siap ya!\n\n🎮 *${passName}*\n🔖 ID: ${orderId}\n\nSilakan buka game CDID dan ambil game pass kamu. Terima kasih sudah order! 🚗💨`;
+  window.open(`https://wa.me/${ADMIN_WA}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+function copyId(id){
+  try{navigator.clipboard.writeText(id);}catch(e){}
+  showToast('📋 ID disalin: '+id);
+}
+
+// Auto refresh setiap 30 detik
+setInterval(()=>{
+  if(document.getElementById('adminPage').style.display!=='none') loadOrders();
+},30000);
+</script>
+</body>
+</html>

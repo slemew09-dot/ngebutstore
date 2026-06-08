@@ -772,7 +772,7 @@ async function proceedToPayDetail(){
     renderPayDetailPage(txData);
     showPage('payDetailPage');
     startPayTimer(3*60*60); // 3 jam
-  }catch(e){hideLoading();showToast('❌ Gagal buat pesanan.');console.error(e);}
+  }catch(e){hideLoading();console.error('Order error:',e);showToast('❌ Gagal: '+e.message.substring(0,60));}
 }
 
 // RENDER PAY DETAIL PAGE
@@ -903,7 +903,7 @@ async function goToTxFromPay(){
       tx=all[idx]||{id:currentTxId,pass_name:selPass.name,pass_id:selPass.id,username:document.getElementById('unameInput').value,price:selPass.price,status:'disiapkan',schedule:getSchedule(),created_at:new Date().toISOString(),paid_at:new Date().toISOString()};
     }
     showTxPage(tx);
-  }catch(e){console.error(e);showToast('❌ Gagal ambil data');}
+  }catch(e){console.error(e);showToast('❌ '+e.message.substring(0,80));}
 }
 
 // TX PAGE
@@ -1006,12 +1006,21 @@ async function sbInsert(d){
     headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json','Prefer':'return=minimal'}
     ,body:JSON.stringify(d)
   });
-  if(!res.ok){const e=await res.text();console.error('INSERT ERR:',res.status,e);throw new Error(e);}
+  // 201 = created, 200 = ok, keduanya sukses
+  if(res.status!==201 && res.status!==200 && res.status!==204){
+    const e=await res.text();console.error('INSERT ERR:',res.status,e);throw new Error(e);
+  }
   return true;
 }
 async function sbGet(id){
-  const res=await fetch(SUPABASE_URL+'/rest/v1/transactions?id=eq.'+id+'&select=*',{
-    headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}
+  const ts = Date.now();
+  const res=await fetch(SUPABASE_URL+'/rest/v1/transactions?id=eq.'+id+'&select=*&_='+ts,{
+    headers:{
+      'apikey':SUPABASE_ANON_KEY,
+      'Authorization':'Bearer '+SUPABASE_ANON_KEY,
+      'Cache-Control':'no-cache, no-store',
+      'Pragma':'no-cache'
+    }
   });
   if(!res.ok){const e=await res.text();console.error('GET ERR:',res.status,e);throw new Error(e);}
   const r=await res.json();return r[0];

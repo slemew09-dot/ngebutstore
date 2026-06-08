@@ -253,12 +253,20 @@ async function sbFetch(path){
   return res.json();
 }
 async function sbUpdate(id,d){
-  const res=await fetch(SUPABASE_URL+'/rest/v1/transactions?id=eq.'+id,{
+  const res=await fetch(SUPABASE_URL+'/rest/v1/transactions?id=eq.'+encodeURIComponent(id),{
     method:'PATCH',
-    headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+    headers:{
+      'apikey':SUPABASE_ANON_KEY,
+      'Authorization':'Bearer '+SUPABASE_ANON_KEY,
+      'Content-Type':'application/json',
+      'Prefer':'return=minimal'
+    },
     body:JSON.stringify(d)
   });
-  if(!res.ok){const e=await res.text();console.error('UPDATE ERR:',res.status,e);throw new Error(e);}
+  console.log('UPDATE status:', res.status, 'id:', id, 'data:', JSON.stringify(d));
+  if(res.status!==200&&res.status!==204&&res.status!==201){
+    const e=await res.text();console.error('UPDATE ERR:',res.status,e);throw new Error(e);
+  }
   return true;
 }
 

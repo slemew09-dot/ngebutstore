@@ -122,6 +122,19 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div><span style="font-size:0.8rem;color:var(--muted);font-weight:700;">Memuat...</span></div>
 <div class="toast" id="toast"></div>
 
+<!-- MODAL KODE ROOM -->
+<div id="roomModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#fff;border-radius:20px;padding:1.5rem;width:100%;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+    <div style="font-weight:900;font-size:1rem;margin-bottom:4px;">🎮 Kode Room CDID</div>
+    <div style="font-size:0.75rem;color:var(--muted);margin-bottom:1rem;">Masukkan kode room, customer akan melihatnya di halaman status pesanan.</div>
+    <input id="roomCodeInput" type="text" placeholder="Contoh: ABC123" style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:var(--font);font-size:1rem;font-weight:700;outline:none;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem;" oninput="this.value=this.value.toUpperCase()">
+    <div style="display:flex;gap:8px;">
+      <button onclick="closeRoomModal()" style="flex:1;padding:12px;border:1.5px solid var(--border);border-radius:var(--rs);background:#fff;font-family:var(--font);font-weight:800;font-size:0.85rem;cursor:pointer;">Batal</button>
+      <button onclick="submitRoomCode()" style="flex:2;padding:12px;border:none;border-radius:var(--rs);background:var(--green);color:#fff;font-family:var(--font);font-weight:800;font-size:0.85rem;cursor:pointer;">🎯 Kirim & Siap Diambil</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== LOGIN PAGE ===== -->
 <div id="loginPage">
   <div class="login-card">
@@ -187,7 +200,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 const SUPABASE_URL = 'https://pyiymaudhpoefbragzbz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_fXP6gYACqoKWzfyqI7rHiA_2TjhR9KK';
 const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'admin12'; // GANTI PASSWORD INI BRO!
+const ADMIN_PASS = 'ngebut2024'; // GANTI PASSWORD INI BRO!
 const ADMIN_WA = '6283842700877';
 // ============================================================
 
@@ -315,7 +328,7 @@ function renderOrderCard(o){
     actions.push(`<button class="btn-action btn-cancel" onclick="updateStatus('${o.id}','dibatalkan')">❌ Batalkan</button>`);
   }
   if(o.status==='disiapkan'){
-    actions.push(`<button class="btn-action btn-ready" onclick="updateStatus('${o.id}','siap_diambil')">🎯 Siap Diambil</button>`);
+    actions.push(`<button class="btn-action btn-ready" onclick="openRoomModal('${o.id}')">🎯 Siap Diambil</button>`);
   }
   if(o.status==='siap_diambil'){
     actions.push(`<button class="btn-action btn-selesai" onclick="updateStatus('${o.id}','selesai')">✅ Selesai</button>`);
@@ -346,6 +359,7 @@ function renderOrderCard(o){
           <div class="order-meta-item"><div class="order-meta-lbl">Email</div><div class="order-meta-val">${o.email||'—'}</div></div>
         </div>
         ${o.note?`<div class="note-text">📝 ${o.note}</div>`:''}
+        ${o.room_code?`<div class="note-text" style="background:#dcfce7;color:#15803d;">🎮 Kode Room: <strong>${o.room_code}</strong></div>`:''}
         <div class="order-actions">${actions.join('')}</div>
       </div>
     </div>`;
@@ -395,6 +409,56 @@ function hubungiWA(username, passName, orderId){
 function copyId(id){
   try{navigator.clipboard.writeText(id);}catch(e){}
   showToast('📋 ID disalin: '+id);
+}
+
+let pendingRoomOrderId = null;
+
+function openRoomModal(id){
+  pendingRoomOrderId = id;
+  document.getElementById('roomCodeInput').value = '';
+  const modal = document.getElementById('roomModal');
+  modal.style.display = 'flex';
+  setTimeout(()=>document.getElementById('roomCodeInput').focus(), 100);
+}
+
+function closeRoomModal(){
+  document.getElementById('roomModal').style.display = 'none';
+  pendingRoomOrderId = null;
+}
+
+async function submitRoomCode(){
+  const code = document.getElementById('roomCodeInput').value.trim();
+  if(!code){ showToast('⚠️ Masukkan kode room dulu'); return; }
+  closeRoomModal();
+  showLoading();
+  try{
+    const updateData = {
+      status: 'siap_diambil',
+      ready_at: new Date().toISOString(),
+      room_code: code
+    };
+    await sbUpdate(pendingRoomOrderId, updateData);
+    const idx = allOrders.findIndex(o=>o.id===pendingRoomOrderId);
+    if(idx>=0) Object.assign(allOrders[idx], updateData);
+    updateStats();
+    renderOrders();
+    showToast('✅ Kode room terkirim ke customer!');
+  }catch(e){
+    // localStorage fallback
+    const all = JSON.parse(localStorage.getItem('ngebut_tx')||'[]');
+    const idx = all.findIndex(o=>o.id===pendingRoomOrderId);
+    if(idx>=0){
+      all[idx].status='siap_diambil';
+      all[idx].ready_at=new Date().toISOString();
+      all[idx].room_code=code;
+      localStorage.setItem('ngebut_tx', JSON.stringify(all));
+      allOrders = all;
+    }
+    updateStats();
+    renderOrders();
+    showToast('✅ Kode room tersimpan!');
+  }
+  hideLoading();
 }
 
 // Auto refresh setiap 30 detik

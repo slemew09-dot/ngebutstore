@@ -505,6 +505,10 @@ input.uname-field::placeholder{color:#cbd5e1;font-weight:400;}
         <span>📅 Jadwal Terdekat</span>
         <span id="scheduleTime">—</span>
       </div>
+      <div class="schedule-row" id="roomCodeRow" style="display:none;background:#dcfce7;border-color:#86efac;">
+        <span style="color:#15803d;font-weight:800;">🎮 Kode Room CDID</span>
+        <span style="color:#15803d;font-weight:900;font-size:1rem;" id="roomCodeDisplay">—</span>
+      </div>
     </div>
     <div class="tx-detail-card">
       <div class="tx-row"><span class="tx-row-lbl">ID Pesanan</span><span class="tx-id-val" id="txIdVal">—<button class="copy-id-btn" onclick="copyTxId()">SALIN</button></span></div>
@@ -919,6 +923,13 @@ function renderStatus(tx){
   document.getElementById('statusVal').textContent=cfg.val;
   document.getElementById('statusSub').textContent=cfg.sub;
   ['seg1','seg2','seg3','seg4'].forEach((id,i)=>{document.getElementById(id).className='prog-seg'+(cfg.segs[i]?' done':'');});
+  // Tampilkan kode room kalau ada
+  if(tx.room_code && (tx.status==='siap_diambil'||tx.status==='selesai')){
+    document.getElementById('roomCodeRow').style.display='flex';
+    document.getElementById('roomCodeDisplay').textContent=tx.room_code;
+  } else {
+    document.getElementById('roomCodeRow').style.display='none';
+  }
   document.getElementById('timeline').innerHTML=cfg.tl.map(item=>`
     <div class="tl-item">
       <div class="tl-dot ${item.st}">${item.st==='done'?'<svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>':''}</div>

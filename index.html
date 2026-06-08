@@ -520,10 +520,11 @@ input.uname-field::placeholder{color:#cbd5e1;font-weight:400;}
     <div class="guide-card">
       <div class="guide-hd open" id="guideHd" onclick="toggleGuide()"><span>❓ Panduan Pengambilan Gamepass</span><span class="guide-chev">▼</span></div>
       <div class="guide-body open" id="guideBody">
-        <div class="g-step"><div class="g-num">1</div><div class="g-text">Tunggu status berubah jadi <strong>"SIAP DIAMBIL"</strong> — kamu akan dihubungi via WhatsApp.</div></div>
-        <div class="g-step"><div class="g-num">2</div><div class="g-text">Buka game <strong>CDID di Roblox</strong>, masuk ke menu Store atau Game Pass.</div></div>
-        <div class="g-step"><div class="g-num">3</div><div class="g-text">Game pass otomatis muncul di inventory. Langsung bisa dipakai!</div></div>
-        <div class="g-step"><div class="g-num">4</div><div class="g-text">Jika dalam <strong>2 jam setelah jadwal</strong> belum masuk, hubungi kami via WhatsApp.</div></div>
+        <div class="g-step"><div class="g-num">1</div><div class="g-text">Tunggu status berubah jadi <strong>"SIAP DIAMBIL"</strong> — kode room CDID akan muncul di halaman ini.</div></div>
+        <div class="g-step"><div class="g-num">2</div><div class="g-text">Buka game <strong>CDID di Roblox</strong>, pilih <strong>Join Room</strong> lalu masukkan kode room yang tertera.</div></div>
+        <div class="g-step"><div class="g-num">3</div><div class="g-text">Setelah masuk room, <strong>admin akan langsung gift gamepass</strong> ke akun kamu di dalam game.</div></div>
+        <div class="g-step"><div class="g-num">4</div><div class="g-text">Gamepass langsung aktif dan bisa dipakai! Status pesanan akan berubah jadi <strong>"Selesai"</strong>.</div></div>
+        <div class="g-step"><div class="g-num">5</div><div class="g-text">Jika dalam <strong>30 menit</strong> setelah status "Siap Diambil" belum diproses, hubungi kami via <strong>WhatsApp</strong>.</div></div>
       </div>
     </div>
   </div>
@@ -583,6 +584,8 @@ function showPage(id){
     document.getElementById(p).style.display=p===id?'block':'none';
   });
   window.scrollTo(0,0);
+  // Simpan halaman aktif
+  try{ sessionStorage.setItem('activePage', id); }catch(e){}
 }
 
 // TICKER
@@ -722,8 +725,15 @@ function goToCheckout(){
     coImg.onload=()=>{coImg.style.display='block';document.getElementById('coAvatarEmoji').style.display='none';};
   }
   document.getElementById('coUsername').textContent=uname;
-  document.getElementById('coItemIcon').textContent=selPass.icon;
-  document.getElementById('coItemIcon').style.background=selPass.bg;
+  const coIcon = document.getElementById('coItemIcon');
+  coIcon.style.background = selPass.img ? '#f1f5f9' : selPass.bg;
+  coIcon.style.overflow = 'hidden';
+  coIcon.style.padding = '0';
+  if(selPass.img){
+    coIcon.innerHTML = '<img src="'+selPass.img+'" style="width:52px;height:52px;object-fit:cover;border-radius:12px;">';
+  } else {
+    coIcon.textContent = selPass.icon;
+  }
   document.getElementById('coItemName').textContent=selPass.name;
   document.getElementById('coQtyPrice').textContent=fmt(selPass.price);
   document.getElementById('coQtyPriceLabel').textContent=selPass.price.toLocaleString('id-ID')+' / 1 item';
@@ -897,8 +907,11 @@ async function goToTxFromPay(){
 }
 
 // TX PAGE
+let txRefreshInterval = null;
+
 function showTxPage(tx){
   showPage('txPage');currentTxId=tx.id;
+  try{ sessionStorage.setItem('currentTxId', tx.id); }catch(e){}
   document.getElementById('txIdVal').childNodes[0].textContent=tx.id+' ';
   document.getElementById('txDate').textContent=formatDate(tx.created_at);
   document.getElementById('txPass').textContent=tx.pass_name;
@@ -906,6 +919,30 @@ function showTxPage(tx){
   document.getElementById('txTotal').textContent=fmt(tx.price);
   document.getElementById('scheduleTime').textContent=tx.schedule||'—';
   renderStatus(tx);
+  // Auto refresh setiap 10 detik kalau status belum selesai
+  clearInterval(txRefreshInterval);
+  if(tx.status !== 'selesai' && tx.status !== 'dibatalkan'){
+    txRefreshInterval = setInterval(()=>refreshTxStatus(), 10000);
+  }
+}
+
+async function refreshTxStatus(){
+  try{
+    let tx;
+    if(SUPABASE_URL !== 'GANTI_DENGAN_PROJECT_URL'){
+      tx = await sbGet(currentTxId);
+    } else {
+      const all = JSON.parse(localStorage.getItem('ngebut_tx')||'[]');
+      tx = all.find(t=>t.id===currentTxId);
+    }
+    if(!tx) return;
+    renderStatus(tx);
+    document.getElementById('scheduleTime').textContent = tx.schedule||'—';
+    // Stop refresh kalau udah selesai
+    if(tx.status==='selesai'||tx.status==='dibatalkan'){
+      clearInterval(txRefreshInterval);
+    }
+  }catch(e){ console.error(e); }
 }
 
 function renderStatus(tx){
@@ -976,7 +1013,32 @@ renderPasses();
 initTicker();
 const urlParams=new URLSearchParams(window.location.search);
 const txParam=urlParams.get('tx');
-if(txParam){document.getElementById('cekIdInput').value=txParam;cekStatus();}
+if(txParam){
+  document.getElementById('cekIdInput').value=txParam;
+  cekStatus();
+} else {
+  // Restore halaman tx kalau ada di sessionStorage
+  try{
+    const savedPage = sessionStorage.getItem('activePage');
+    const savedTxId = sessionStorage.getItem('currentTxId');
+    if(savedPage==='txPage' && savedTxId){
+      currentTxId = savedTxId;
+      // Fetch ulang data tx
+      (async()=>{
+        try{
+          let tx;
+          if(SUPABASE_URL!=='GANTI_DENGAN_PROJECT_URL'){
+            tx = await sbGet(savedTxId);
+          } else {
+            const all = JSON.parse(localStorage.getItem('ngebut_tx')||'[]');
+            tx = all.find(t=>t.id===savedTxId);
+          }
+          if(tx) showTxPage(tx);
+        }catch(e){}
+      })();
+    }
+  }catch(e){}
+}
 </script>
 </body>
 </html>

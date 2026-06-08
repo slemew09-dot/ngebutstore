@@ -245,15 +245,21 @@ if(localStorage.getItem('ngebut_admin')==='1'){
 }
 
 // SUPABASE
-async function sbFetch(path,opts={}){
-  const headers={'apikey':SUPABASE_ANON_KEY,'Authorization':`Bearer ${SUPABASE_ANON_KEY}`,'Content-Type':'application/json'};
-  if(opts.prefer) headers['Prefer']=opts.prefer;
-  const res=await fetch(`${SUPABASE_URL}/rest/v1/${path}`,{...opts,headers});
-  if(!res.ok){const err=await res.text();console.error('Supabase error:',err);throw new Error(err);}
-  const t=await res.text();return t?JSON.parse(t):null;
+async function sbFetch(path){
+  const res=await fetch(SUPABASE_URL+'/rest/v1/'+path,{
+    headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}
+  });
+  if(!res.ok){const e=await res.text();console.error('GET ERR:',res.status,e);throw new Error(e);}
+  return res.json();
 }
 async function sbUpdate(id,d){
-  return sbFetch(`transactions?id=eq.${id}`,{method:'PATCH',prefer:'return=minimal',body:JSON.stringify(d)});
+  const res=await fetch(SUPABASE_URL+'/rest/v1/transactions?id=eq.'+id,{
+    method:'PATCH',
+    headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify(d)
+  });
+  if(!res.ok){const e=await res.text();console.error('UPDATE ERR:',res.status,e);throw new Error(e);}
+  return true;
 }
 
 // LOAD ORDERS

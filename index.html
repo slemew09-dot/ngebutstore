@@ -870,6 +870,10 @@ function generateQRSVG(){
   return `<div class="qr-box"><svg viewBox="0 0 170 170" xmlns="http://www.w3.org/2000/svg" width="160" height="160">${rects}</svg></div>`;
 }
 
+function startPayTimer(secs){
+  startPayCountdown(secs);
+}
+
 let payCountdownInterval=null;
 function startPayCountdown(secs){
   clearInterval(payCountdownInterval);
@@ -1013,13 +1017,11 @@ async function sbInsert(d){
   return true;
 }
 async function sbGet(id){
-  const ts = Date.now();
-  const res=await fetch(SUPABASE_URL+'/rest/v1/transactions?id=eq.'+id+'&select=*&_='+ts,{
+  const res=await fetch(SUPABASE_URL+'/rest/v1/transactions?id=eq.'+id+'&select=*',{
     headers:{
       'apikey':SUPABASE_ANON_KEY,
       'Authorization':'Bearer '+SUPABASE_ANON_KEY,
-      'Cache-Control':'no-cache, no-store',
-      'Pragma':'no-cache'
+      'Cache-Control':'no-cache'
     }
   });
   if(!res.ok){const e=await res.text();console.error('GET ERR:',res.status,e);throw new Error(e);}

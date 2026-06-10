@@ -115,6 +115,25 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 
 .note-text{font-size:0.72rem;color:var(--muted);background:var(--bg);border-radius:6px;padding:5px 8px;margin-top:6px;font-style:italic;}
+
+/* SPONSOR SECTION */
+.sponsor-section{background:#fff;border-radius:var(--r);border:1px solid var(--border);padding:1rem;margin-bottom:1rem;}
+.sponsor-title{font-weight:900;font-size:0.9rem;margin-bottom:0.75rem;display:flex;align-items:center;gap:6px;}
+.sponsor-preview{width:100%;max-height:180px;object-fit:contain;border-radius:10px;border:1px solid var(--border);display:none;margin-bottom:0.75rem;}
+.sponsor-preview.show{display:block;}
+.sponsor-placeholder{width:100%;height:120px;border:2px dashed var(--border);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:0.8rem;margin-bottom:0.75rem;cursor:pointer;transition:border-color 0.15s;}
+.sponsor-placeholder:hover{border-color:var(--p);color:var(--p);}
+.sponsor-placeholder.hidden{display:none;}
+.sponsor-status{font-size:0.72rem;padding:5px 10px;border-radius:20px;font-weight:800;display:inline-flex;align-items:center;gap:4px;}
+.sponsor-status.active{background:#dcfce7;color:#15803d;}
+.sponsor-status.inactive{background:#fee2e2;color:#991b1b;}
+.sponsor-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:0.75rem;}
+.btn-sponsor-upload{background:var(--p);color:#fff;border:none;border-radius:var(--rs);padding:8px 16px;font-family:var(--font);font-size:0.78rem;font-weight:800;cursor:pointer;}
+.btn-sponsor-toggle{border:none;border-radius:var(--rs);padding:8px 16px;font-family:var(--font);font-size:0.78rem;font-weight:800;cursor:pointer;}
+.btn-sponsor-toggle.on{background:#dcfce7;color:#15803d;}
+.btn-sponsor-toggle.off{background:#fee2e2;color:#991b1b;}
+.btn-sponsor-delete{background:#fee2e2;color:#991b1b;border:none;border-radius:var(--rs);padding:8px 16px;font-family:var(--font);font-size:0.78rem;font-weight:800;cursor:pointer;}
+.sponsor-info{font-size:0.7rem;color:var(--muted);margin-top:6px;}
 </style>
 </head>
 <body>
@@ -160,6 +179,28 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   </div>
 
   <div class="admin-body fade-up">
+
+    <!-- SPONSOR BANNER SECTION -->
+    <div class="sponsor-section">
+      <div class="sponsor-title">🎯 Sponsor Banner (Popup Pembuka)</div>
+      <img id="sponsorPreview" class="sponsor-preview" src="" alt="Preview sponsor">
+      <div class="sponsor-placeholder" id="sponsorPlaceholder" onclick="document.getElementById('sponsorFileInput').click()">
+        <span style="font-size:2rem;">🖼️</span>
+        <span>Tap untuk upload gambar sponsor</span>
+        <span style="font-size:0.65rem;">JPG, PNG, GIF — maks 2MB</span>
+      </div>
+      <input type="file" id="sponsorFileInput" accept="image/*" style="display:none" onchange="handleSponsorUpload(event)">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <span class="sponsor-status inactive" id="sponsorStatus">⚫ Tidak Ada Banner</span>
+        <div id="sponsorDuration" style="font-size:0.72rem;color:var(--muted);display:none">⏱️ Tampil selama <strong>5 detik</strong></div>
+      </div>
+      <div class="sponsor-actions" id="sponsorActions" style="display:none">
+        <button class="btn-sponsor-upload" onclick="document.getElementById('sponsorFileInput').click()">🔄 Ganti Gambar</button>
+        <button class="btn-sponsor-toggle on" id="btnSponsorToggle" onclick="toggleSponsor()">✅ Aktif</button>
+        <button class="btn-sponsor-delete" onclick="deleteSponsor()">🗑️ Hapus</button>
+      </div>
+      <div class="sponsor-info">💡 Gambar akan muncul sebagai popup saat customer pertama kali membuka toko. Customer bisa tap untuk menutupnya.</div>
+    </div>
 
     <!-- Stats -->
     <div class="stats-grid" id="statsGrid">
@@ -226,6 +267,7 @@ function doLogin(){
     document.getElementById('adminPage').style.display='block';
     localStorage.setItem('ngebut_admin','1');
     loadOrders();
+    loadSponsor();
   } else {
     document.getElementById('loginErr').style.display='block';
   }
@@ -479,6 +521,135 @@ async function submitRoomCode(){
 setInterval(()=>{
   if(document.getElementById('adminPage').style.display!=='none') loadOrders();
 },30000);
+
+// ===== SPONSOR BANNER =====
+async function sbGetSponsor(){
+  try{
+    const res = await fetch(SUPABASE_URL+'/rest/v1/sponsor_banner?select=*&order=created_at.desc&limit=1',{
+      headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}
+    });
+    if(!res.ok) return null;
+    const data = await res.json();
+    return data[0]||null;
+  }catch(e){ return null; }
+}
+
+async function sbUpsertSponsor(d){
+  // Delete existing then insert
+  await fetch(SUPABASE_URL+'/rest/v1/sponsor_banner',{
+    method:'DELETE',
+    headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}
+  });
+  const res = await fetch(SUPABASE_URL+'/rest/v1/sponsor_banner',{
+    method:'POST',
+    headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify(d)
+  });
+  if(!res.ok){const e=await res.text();throw new Error(e);}
+  return true;
+}
+
+async function sbUpdateSponsor(d){
+  const res = await fetch(SUPABASE_URL+'/rest/v1/sponsor_banner',{
+    method:'PATCH',
+    headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify(d)
+  });
+  if(!res.ok){const e=await res.text();throw new Error(e);}
+  return true;
+}
+
+function renderSponsorUI(sponsor){
+  const preview = document.getElementById('sponsorPreview');
+  const placeholder = document.getElementById('sponsorPlaceholder');
+  const status = document.getElementById('sponsorStatus');
+  const actions = document.getElementById('sponsorActions');
+  const duration = document.getElementById('sponsorDuration');
+  const toggleBtn = document.getElementById('btnSponsorToggle');
+
+  if(sponsor && sponsor.image_base64){
+    preview.src = sponsor.image_base64;
+    preview.classList.add('show');
+    placeholder.classList.add('hidden');
+    actions.style.display='flex';
+    duration.style.display='block';
+    if(sponsor.active){
+      status.className='sponsor-status active';
+      status.textContent='🟢 Aktif — Muncul di toko';
+      toggleBtn.className='btn-sponsor-toggle on';
+      toggleBtn.textContent='✅ Aktif';
+    } else {
+      status.className='sponsor-status inactive';
+      status.textContent='🔴 Nonaktif — Tidak muncul';
+      toggleBtn.className='btn-sponsor-toggle off';
+      toggleBtn.textContent='⭕ Aktifkan';
+    }
+  } else {
+    preview.classList.remove('show');
+    placeholder.classList.remove('hidden');
+    actions.style.display='none';
+    duration.style.display='none';
+    status.className='sponsor-status inactive';
+    status.textContent='⚫ Tidak Ada Banner';
+  }
+}
+
+async function loadSponsor(){
+  const sponsor = await sbGetSponsor();
+  renderSponsorUI(sponsor);
+}
+
+async function handleSponsorUpload(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  if(file.size > 2*1024*1024){ showToast('⚠️ Gambar maks 2MB ya!'); return; }
+  showLoading();
+  try{
+    const base64 = await new Promise((res,rej)=>{
+      const r = new FileReader();
+      r.onload = ()=>res(r.result);
+      r.onerror = ()=>rej();
+      r.readAsDataURL(file);
+    });
+    await sbUpsertSponsor({ image_base64: base64, active: true, created_at: new Date().toISOString() });
+    renderSponsorUI({ image_base64: base64, active: true });
+    showToast('✅ Banner sponsor berhasil diupload!');
+  }catch(e){
+    showToast('❌ Gagal upload: '+e.message.substring(0,50));
+  }
+  hideLoading();
+  event.target.value='';
+}
+
+async function toggleSponsor(){
+  showLoading();
+  try{
+    const sponsor = await sbGetSponsor();
+    if(!sponsor){ showToast('⚠️ Upload gambar dulu'); hideLoading(); return; }
+    const newActive = !sponsor.active;
+    await sbUpdateSponsor({ active: newActive });
+    renderSponsorUI({ ...sponsor, active: newActive });
+    showToast(newActive ? '✅ Banner diaktifkan!' : '⭕ Banner dinonaktifkan!');
+  }catch(e){ showToast('❌ Gagal update'); }
+  hideLoading();
+}
+
+async function deleteSponsor(){
+  if(!confirm('Hapus banner sponsor?')) return;
+  showLoading();
+  try{
+    await fetch(SUPABASE_URL+'/rest/v1/sponsor_banner',{
+      method:'DELETE',
+      headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}
+    });
+    renderSponsorUI(null);
+    showToast('🗑️ Banner dihapus!');
+  }catch(e){ showToast('❌ Gagal hapus'); }
+  hideLoading();
+}
+
+// Load sponsor on admin page load
+if(localStorage.getItem('ngebut_admin')==='1'){ loadSponsor(); }
 </script>
 </body>
 </html>

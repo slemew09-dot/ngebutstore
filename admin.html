@@ -442,6 +442,7 @@ function closeRoomModal(){
 async function submitRoomCode(){
   const code = document.getElementById('roomCodeInput').value.trim();
   if(!code){ showToast('⚠️ Masukkan kode room dulu'); return; }
+  const orderId = pendingRoomOrderId; // simpan dulu sebelum closeModal
   closeRoomModal();
   showLoading();
   try{
@@ -450,8 +451,8 @@ async function submitRoomCode(){
       ready_at: new Date().toISOString(),
       room_code: code
     };
-    await sbUpdate(pendingRoomOrderId, updateData);
-    const idx = allOrders.findIndex(o=>o.id===pendingRoomOrderId);
+    await sbUpdate(orderId, updateData);
+    const idx = allOrders.findIndex(o=>o.id===orderId);
     if(idx>=0) Object.assign(allOrders[idx], updateData);
     updateStats();
     renderOrders();
@@ -459,7 +460,7 @@ async function submitRoomCode(){
   }catch(e){
     // localStorage fallback
     const all = JSON.parse(localStorage.getItem('ngebut_tx')||'[]');
-    const idx = all.findIndex(o=>o.id===pendingRoomOrderId);
+    const idx = all.findIndex(o=>o.id===orderId);
     if(idx>=0){
       all[idx].status='siap_diambil';
       all[idx].ready_at=new Date().toISOString();

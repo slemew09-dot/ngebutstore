@@ -569,6 +569,15 @@ input.uname-field::placeholder{color:#cbd5e1;font-weight:400;}
   </div>
 </div>
 
+<!-- ===== SPONSOR POPUP ===== -->
+<div id="sponsorPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center;padding:1rem;">
+  <div style="position:relative;max-width:380px;width:100%;">
+    <img id="sponsorPopupImg" src="" alt="Sponsor" style="width:100%;border-radius:16px;display:block;box-shadow:0 8px 40px rgba(0,0,0,0.4);">
+    <button onclick="closeSponsorPopup()" style="position:absolute;top:-12px;right:-12px;width:34px;height:34px;border-radius:50%;background:#fff;border:none;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;">&#x2715;</button>
+    <div id="sponsorCountdown" style="position:absolute;bottom:10px;right:12px;background:rgba(0,0,0,0.55);color:#fff;font-size:0.7rem;font-weight:800;padding:4px 10px;border-radius:20px;">Tutup dalam <span id="sponsorSec">5</span>s</div>
+  </div>
+</div>
+
 <a class="wa-fab" href="https://wa.me/6283842700877" target="_blank">💬</a>
 
 <!-- ===== AI CHAT WIDGET ===== -->
@@ -1140,6 +1149,43 @@ async function sbUpdate(id,d){
   if(!res.ok){const e=await res.text();console.error('UPDATE ERR:',res.status,e);throw new Error(e);}
   return true;
 }
+
+// ===== SPONSOR POPUP =====
+let sponsorTimer = null;
+
+async function loadAndShowSponsor(){
+  try{
+    const res = await fetch(SUPABASE_URL+'/rest/v1/sponsor_banner?select=*&order=created_at.desc&limit=1',{
+      headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}
+    });
+    if(!res.ok) return;
+    const data = await res.json();
+    const sponsor = data[0];
+    if(!sponsor || !sponsor.active || !sponsor.image_base64) return;
+    document.getElementById('sponsorPopupImg').src = sponsor.image_base64;
+    const popup = document.getElementById('sponsorPopup');
+    popup.style.display = 'flex';
+    let sec = 5;
+    document.getElementById('sponsorSec').textContent = sec;
+    sponsorTimer = setInterval(()=>{
+      sec--;
+      const el = document.getElementById('sponsorSec');
+      if(el) el.textContent = sec;
+      if(sec <= 0){ clearInterval(sponsorTimer); closeSponsorPopup(); }
+    }, 1000);
+  }catch(e){ console.log('Sponsor load error:', e); }
+}
+
+function closeSponsorPopup(){
+  clearInterval(sponsorTimer);
+  const popup = document.getElementById('sponsorPopup');
+  popup.style.opacity='0';
+  popup.style.transition='opacity 0.3s';
+  setTimeout(()=>{ popup.style.display='none'; popup.style.opacity=''; popup.style.transition=''; }, 300);
+}
+
+// Tampilkan sponsor setelah 0.8 detik
+setTimeout(loadAndShowSponsor, 800);
 
 // INIT
 renderPasses();

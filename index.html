@@ -88,6 +88,11 @@ input.uname-field{border:none;outline:none;font-family:var(--font);font-size:0.9
 input.uname-field::placeholder{color:#cbd5e1;font-weight:400;}
 .valid-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem;cursor:pointer;}
 .valid-icon.ok{background:#dcfce7;}
+.valid-icon.err{background:#fee2e2;}
+.uname-input-wrap.valid{border-color:#16a34a;}
+.uname-input-wrap.invalid{border-color:#dc2626;background:#fff5f5;}
+.uname-error-msg{font-size:0.75rem;color:#dc2626;font-weight:700;margin-top:-0.5rem;margin-bottom:0.75rem;display:none;padding-left:2px;}
+.uname-error-msg.show{display:block;}
 .note-lbl{font-size:0.82rem;font-weight:800;color:var(--text);margin-bottom:6px;}
 .note-lbl span{color:var(--muted);font-weight:400;}
 .note-input{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:var(--rs);font-family:var(--font);font-size:0.85rem;color:var(--text);background:#fff;outline:none;resize:none;transition:border-color 0.15s;min-height:80px;}
@@ -356,6 +361,7 @@ input.uname-field::placeholder{color:#cbd5e1;font-weight:400;}
       </div>
       <div class="valid-icon" id="validIcon" onclick="clearUsername()"></div>
     </div>
+    <div class="uname-error-msg" id="unameErrorMsg">⚠️ Username tidak ditemukan, Pastikan kamu input dengan benar.</div>
     <div class="note-lbl">Catatan <span>(Opsional)</span></div>
     <textarea class="note-input" id="noteInput" placeholder="Masukan request kamu"></textarea>
   </div>
@@ -679,6 +685,8 @@ function resetAvatar(){
   document.getElementById('avatarEmoji').style.display='inline';
   const img=document.getElementById('avatarImg');img.style.display='none';img.src='';
   const vi=document.getElementById('validIcon');vi.textContent='';vi.className='valid-icon';
+  document.getElementById('unameWrap').classList.remove('valid','invalid');
+  document.getElementById('unameErrorMsg').classList.remove('show');
 }
 
 function clearUsername(){
@@ -688,10 +696,14 @@ function clearUsername(){
 }
 
 function onUnameInput(val){
-  clearTimeout(robloxTimer);resetAvatar();
+  clearTimeout(robloxTimer);
+  resetAvatar();
+  document.getElementById('unameErrorMsg').classList.remove('show');
+  document.getElementById('unameWrap').classList.remove('valid','invalid');
   if(val.trim().length>=3){
-    document.getElementById('beliBtn').disabled=false;
-    const vi=document.getElementById('validIcon');vi.textContent='✅';vi.className='valid-icon ok';
+    document.getElementById('beliBtn').disabled=true;
+    const vi=document.getElementById('validIcon');
+    vi.textContent='⏳';vi.className='valid-icon';
     robloxTimer=setTimeout(()=>lookupAvatar(val.trim()),800);
   } else {
     document.getElementById('beliBtn').disabled=true;
@@ -699,41 +711,18 @@ function onUnameInput(val){
 }
 
 async function lookupAvatar(username){
-  // Coba beberapa proxy
-  const proxies = [
-    'https://corsproxy.io/?url=',
-    'https://api.allorigins.win/raw?url=',
-    'https://proxy.cors.sh/',
-  ];
-  for(const proxy of proxies){
-    try{
-      const res = await fetch(proxy + encodeURIComponent(`https://api.roblox.com/users/get-by-username?username=${username}`), {signal: AbortSignal.timeout(5000)});
-      if(!res.ok) continue;
-      const data = await res.json();
-      if(!data.Id) return;
-      // Langsung pake URL thumbnail tanpa proxy
-      const thumbUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${data.Id}&width=150&height=150&format=png`;
-      if(document.getElementById('unameInput').value.trim() === username){
-        const img = document.getElementById('avatarImg');
-        img.onerror = async () => {
-          // Fallback: coba via proxy
-          try{
-            const tr = await fetch(proxy + encodeURIComponent(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${data.Id}&size=150x150&format=Png&isCircular=true`));
-            if(!tr.ok) return;
-            const td = await tr.json();
-            const url = td.data?.[0]?.imageUrl;
-            if(url){ img.onerror=null; img.src=url; }
-          }catch(e){}
-        };
-        img.onload = () => {
-          img.style.display='block';
-          document.getElementById('avatarEmoji').style.display='none';
-        };
-        img.src = thumbUrl;
-      }
-      return;
-    }catch(e){ continue; }
-  }
+  try{
+    const proxy='https://corsproxy.io/?url=';
+    const res=await fetch(proxy+encodeURIComponent(`https://api.roblox.com/users/get-by-username?username=${username}`));
+    if(!res.ok)return;const data=await res.json();if(!data.Id)return;
+    const tr=await fetch(proxy+encodeURIComponent(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${data.Id}&size=150x150&format=Png&isCircular=true`));
+    if(!tr.ok)return;const td=await tr.json();const url=td.data?.[0]?.imageUrl;
+    if(url&&document.getElementById('unameInput').value.trim()===username){
+      const img=document.getElementById('avatarImg');
+      img.onload=()=>{img.style.display='block';document.getElementById('avatarEmoji').style.display='none';};
+      img.src=url;
+    }
+  }catch(e){}
 }
 
 // USERNAME → CHECKOUT

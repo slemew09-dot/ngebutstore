@@ -711,18 +711,51 @@ function onUnameInput(val){
 }
 
 async function lookupAvatar(username){
-  try{
-    const proxy='https://corsproxy.io/?url=';
-    const res=await fetch(proxy+encodeURIComponent(`https://api.roblox.com/users/get-by-username?username=${username}`));
-    if(!res.ok)return;const data=await res.json();if(!data.Id)return;
-    const tr=await fetch(proxy+encodeURIComponent(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${data.Id}&size=150x150&format=Png&isCircular=true`));
-    if(!tr.ok)return;const td=await tr.json();const url=td.data?.[0]?.imageUrl;
-    if(url&&document.getElementById('unameInput').value.trim()===username){
+  const wrap=document.getElementById('unameWrap');
+  const vi=document.getElementById('validIcon');
+  const errMsg=document.getElementById('unameErrorMsg');
+  const stillTyping=()=>document.getElementById('unameInput').value.trim()!==username;
+
+  const setValid=(avatarUrl)=>{
+    if(stillTyping())return;
+    wrap.classList.remove('invalid');wrap.classList.add('valid');
+    vi.textContent='✅';vi.className='valid-icon ok';
+    if(errMsg)errMsg.classList.remove('show');
+    document.getElementById('beliBtn').disabled=false;
+    if(avatarUrl){
       const img=document.getElementById('avatarImg');
       img.onload=()=>{img.style.display='block';document.getElementById('avatarEmoji').style.display='none';};
-      img.src=url;
+      img.src=avatarUrl;
     }
-  }catch(e){}
+  };
+
+  const setInvalid=()=>{
+    if(stillTyping())return;
+    wrap.classList.remove('valid');wrap.classList.add('invalid');
+    vi.textContent='⚠️';vi.className='valid-icon err';
+    if(errMsg)errMsg.classList.add('show');
+    document.getElementById('beliBtn').disabled=true;
+  };
+
+  try{
+    const res=await fetch('https://roblox-proxy.apam5922.workers.dev',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username}),
+      signal:AbortSignal.timeout(6000)
+    });
+    if(!res.ok){setInvalid();return;}
+    const data=await res.json();
+    if(stillTyping())return;
+    if(!data.found){setInvalid();return;}
+    setValid(data.avatarUrl||null);
+  }catch(e){
+    if(!stillTyping()){
+      wrap.classList.remove('invalid','valid');
+      vi.textContent='✅';vi.className='valid-icon ok';
+      document.getElementById('beliBtn').disabled=false;
+    }
+  }
 }
 
 // USERNAME → CHECKOUT

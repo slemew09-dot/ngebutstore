@@ -699,18 +699,41 @@ function onUnameInput(val){
 }
 
 async function lookupAvatar(username){
-  try{
-    const proxy='https://corsproxy.io/?url=';
-    const res=await fetch(proxy+encodeURIComponent(`https://api.roblox.com/users/get-by-username?username=${username}`));
-    if(!res.ok)return;const data=await res.json();if(!data.Id)return;
-    const tr=await fetch(proxy+encodeURIComponent(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${data.Id}&size=150x150&format=Png&isCircular=true`));
-    if(!tr.ok)return;const td=await tr.json();const url=td.data?.[0]?.imageUrl;
-    if(url&&document.getElementById('unameInput').value.trim()===username){
-      const img=document.getElementById('avatarImg');
-      img.onload=()=>{img.style.display='block';document.getElementById('avatarEmoji').style.display='none';};
-      img.src=url;
-    }
-  }catch(e){}
+  // Coba beberapa proxy
+  const proxies = [
+    'https://corsproxy.io/?url=',
+    'https://api.allorigins.win/raw?url=',
+    'https://proxy.cors.sh/',
+  ];
+  for(const proxy of proxies){
+    try{
+      const res = await fetch(proxy + encodeURIComponent(`https://api.roblox.com/users/get-by-username?username=${username}`), {signal: AbortSignal.timeout(5000)});
+      if(!res.ok) continue;
+      const data = await res.json();
+      if(!data.Id) return;
+      // Langsung pake URL thumbnail tanpa proxy
+      const thumbUrl = `https://www.roblox.com/headshot-thumbnail/image?userId=${data.Id}&width=150&height=150&format=png`;
+      if(document.getElementById('unameInput').value.trim() === username){
+        const img = document.getElementById('avatarImg');
+        img.onerror = async () => {
+          // Fallback: coba via proxy
+          try{
+            const tr = await fetch(proxy + encodeURIComponent(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${data.Id}&size=150x150&format=Png&isCircular=true`));
+            if(!tr.ok) return;
+            const td = await tr.json();
+            const url = td.data?.[0]?.imageUrl;
+            if(url){ img.onerror=null; img.src=url; }
+          }catch(e){}
+        };
+        img.onload = () => {
+          img.style.display='block';
+          document.getElementById('avatarEmoji').style.display='none';
+        };
+        img.src = thumbUrl;
+      }
+      return;
+    }catch(e){ continue; }
+  }
 }
 
 // USERNAME → CHECKOUT

@@ -1196,25 +1196,28 @@ renderPasses();
 initTicker();
 
 // ===== AI CHAT WIDGET =====
-const AI_SYSTEM = `Kamu adalah "NgeBot AI", asisten virtual dari Store — toko game pass terpercaya untuk game Car Driving Indonesia (CDID) di Roblox.
+const AI_SYSTEM_FALLBACK = `Kamu adalah "NgeBot AI", asisten virtual dari NgebutStore — toko game pass terpercaya untuk game Drag Drive Simulator (DDS) di Roblox. Jawab singkat, hangat, pakai emoji relevan. Arahkan ke WhatsApp admin https://wa.me/6283842700877 jika tidak bisa menjawab.`;
 
-Tugasmu adalah membantu customer dengan ramah, singkat, dan informatif dalam Bahasa Indonesia. Kamu memiliki kepribadian yang semangat, friendly, dan profesional.Kamu sapa customer dengan Ngebuters dan kalau ada yang nanya tentang diskon suruh mereka check instagram @ngebutstore.id, tidak hanya nanya diskon kalau customer nanya yang kamu ga tahu beri tahu juga dia platform ig tadi
+let AI_SYSTEM = AI_SYSTEM_FALLBACK;
 
-Info produk yang tersedia:
-- Luxury Car Pass: 250 Robux, Rp 45.000 — Pass untuk mobil mewah
-- VIP Server Pass: 200 Robux, Rp 36.000 — Akses server VIP eksklusif
-- Speed Boost Pass: 100 Robux, Rp 18.000 — Boost kecepatan karakter
-- Additional Car Slot: 49 Robux, Rp 9.000 — Tambah slot garasi
+async function loadAIConfig() {
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/ai_config?key=eq.main_prompt&select=value&limit=1', {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Cache-Control': 'no-cache'
+      }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data[0] && data[0].value) {
+      AI_SYSTEM = data[0].value;
+    }
+  } catch(e) { console.log('AI config load error:', e); }
+}
 
-Metode pembayaran: DANA, GoPay, OVO, ShopeePay, BCA, Mandiri, BNI, BRI, QRIS.
-Proses instan setelah pembayaran dikonfirmasi. Customer perlu memasukkan username Roblox.
-
-PENTING - Untuk pertanyaan tentang status pesanan / cek pesanan / pesanan saya:
-Selalu minta customer untuk memberikan ID Pesanan mereka terlebih dahulu (format: 12 karakter huruf dan angka, contoh: A1B2C3D4E5F6). Dan kamu cek di database atau agar kamu bisa liat history pesanan nya.kamu langsung memberikan detail,seperti jam,via pembayaran,dll.buat lebih rapih kebawah dan pakai : contoh via :, berikan via pembayaran yang real sesuai database
-
-Jika pertanyaan tidak bisa dijawab, arahkan ke WhatsApp admin: https://wa.me/6283842700877.
-
-Jawab singkat (maks 2-3 kalimat), hangat, pakai emoji relevan.`;
+loadAIConfig();
 
 let aiHistory = [];
 let aiOpen = false;
@@ -1251,7 +1254,13 @@ function addAiMsg(role, text) {
   aiHistory.push({ role: role === 'bot' ? 'assistant' : 'user', content: text });
 }
 
-function escHtml(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function escHtml(t){
+  t = t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  t = t.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" style="color:#2563eb;text-decoration:underline;word-break:break-all;">$1</a>');
+  t = t.replace(/@([a-zA-Z0-9_.]+)/g,'<a href="https://instagram.com/$1" target="_blank" style="color:#e1306c;text-decoration:underline;">@$1</a>');
+  t = t.replace(/\n/g,'<br>');
+  return t;
+}
 
 function showAiTyping() {
   const msgs = document.getElementById('aiMessages');

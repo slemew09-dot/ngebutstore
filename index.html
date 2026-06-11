@@ -44,6 +44,42 @@
 
   /* FOOTER */
   .footer{text-align:center;padding:1.2rem;font-size:0.7rem;color:#444;border-top:1px solid var(--border);}
+
+  /* ===== SPONSOR POPUP ===== */
+  #sponsorPopup{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center;padding:1rem;}
+
+  /* ===== AI CHAT WIDGET ===== */
+  #aiChatWidget{position:fixed;bottom:1.2rem;right:1.2rem;z-index:1000;font-family:var(--font);display:flex;flex-direction:column;align-items:flex-end;}
+  #aiChatBubble{width:50px;height:50px;background:linear-gradient(135deg,var(--p),#d97706);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;cursor:pointer;box-shadow:0 4px 16px rgba(245,158,11,0.45);transition:transform 0.15s;position:relative;}
+  #aiChatBubble:active{transform:scale(0.93);}
+  #aiChatBubble .ai-notif-dot{position:absolute;top:2px;right:2px;width:13px;height:13px;background:#ef4444;border-radius:50%;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:900;}
+  #aiChatPanel{display:none;width:320px;border-radius:18px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.18);border:1px solid rgba(0,0,0,0.07);background:#fff;flex-direction:column;max-height:500px;position:fixed;bottom:80px;right:1.2rem;z-index:1000;}
+  #aiChatPanel.open{display:flex;}
+  .ai-chat-header{background:linear-gradient(90deg,#0f1e4a,#2563eb);padding:12px 14px;display:flex;align-items:center;gap:10px;position:relative;}
+  .ai-chat-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.2);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;}
+  .ai-chat-avatar{width:38px;height:38px;background:rgba(255,255,255,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;border:2px solid rgba(255,255,255,0.4);}
+  .ai-badge{background:rgba(255,255,255,0.25);color:#fff;font-size:8px;font-weight:900;padding:1px 6px;border-radius:20px;letter-spacing:0.5px;margin-left:4px;}
+  .ai-chat-header-name{font-weight:800;font-size:0.88rem;color:#fff;display:flex;align-items:center;gap:2px;}
+  .ai-chat-header-sub{font-size:0.68rem;color:rgba(255,255,255,0.8);margin-top:1px;}
+  .ai-chat-messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:4px;background:#f8fafc;}
+  .ai-msg-wrap{display:flex;flex-direction:column;}
+  .ai-msg-wrap.user-wrap{align-items:flex-end;}
+  .ai-msg-wrap.bot-wrap{align-items:flex-start;}
+  .ai-msg{max-width:85%;padding:9px 12px;border-radius:16px;font-size:0.8rem;line-height:1.5;word-break:break-word;}
+  .ai-msg.bot{background:#fff;border:1px solid #e2e8f0;border-bottom-left-radius:4px;color:#0f172a;box-shadow:0 1px 3px rgba(0,0,0,0.06);}
+  .ai-msg.user{background:linear-gradient(135deg,var(--p),#d97706);color:#fff;border-bottom-right-radius:4px;}
+  .ai-msg-time{font-size:0.62rem;color:#94a3b8;margin-top:2px;}
+  .ai-typing{display:flex;gap:4px;align-items:center;padding:9px 12px;background:#fff;border:1px solid #e2e8f0;border-radius:16px;border-bottom-left-radius:4px;width:fit-content;}
+  .ai-typing span{width:6px;height:6px;background:#94a3b8;border-radius:50%;animation:aiDot 1.2s infinite;}
+  .ai-typing span:nth-child(2){animation-delay:0.2s;}
+  .ai-typing span:nth-child(3){animation-delay:0.4s;}
+  @keyframes aiDot{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-5px);}}
+  .ai-chat-input-row{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;border-top:1px solid #e2e8f0;}
+  .ai-chat-input{flex:1;border:1.5px solid #e2e8f0;border-radius:24px;padding:9px 14px;font-family:var(--font);font-size:0.82rem;outline:none;resize:none;height:38px;max-height:80px;transition:border-color 0.15s;line-height:1.3;}
+  .ai-chat-input:focus{border-color:var(--p);}
+  .ai-send-btn{width:36px;height:36px;background:linear-gradient(135deg,var(--p),#d97706);border:none;border-radius:50%;color:#fff;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform 0.13s;}
+  .ai-send-btn:active{transform:scale(0.92);}
+  .ai-send-btn:disabled{background:#cbd5e1;cursor:not-allowed;}
 </style>
 </head>
 <body>
@@ -99,5 +135,248 @@
 
 <div class="footer">© 2025 NgebutStore · Top Up Game Pass Tercepat</div>
 
+
+<!-- ===== SPONSOR POPUP ===== -->
+<div id="sponsorPopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center;padding:1rem;">
+  <div style="position:relative;max-width:380px;width:100%;">
+    <img id="sponsorPopupImg" src="" alt="Sponsor" style="width:100%;border-radius:16px;display:block;box-shadow:0 8px 40px rgba(0,0,0,0.4);">
+    <button onclick="closeSponsorPopup()" style="position:absolute;top:-12px;right:-12px;width:34px;height:34px;border-radius:50%;background:#fff;border:none;font-size:1rem;font-weight:900;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;">&#x2715;</button>
+    <div id="sponsorCountdown" style="position:absolute;bottom:10px;right:12px;background:rgba(0,0,0,0.55);color:#fff;font-size:0.7rem;font-weight:800;padding:4px 10px;border-radius:20px;">Tutup dalam <span id="sponsorSec">5</span>s</div>
+  </div>
+</div>
+
+<!-- ===== AI CHAT WIDGET ===== -->
+<div id="aiChatWidget">
+  <div id="aiChatPanelWrapper" style="position:relative;">
+  <div id="aiChatPanel">
+    <div class="ai-chat-header">
+      <div class="ai-chat-avatar">🤖</div>
+      <div style="flex:1">
+        <div class="ai-chat-header-name">NgeBot AI <span class="ai-badge">AI</span></div>
+        <div class="ai-chat-header-sub">Online &middot; Siap Bantu Transaksimu 24/7</div>
+      </div>
+      <button class="ai-chat-close" onclick="toggleAiChat()">&#x2715;</button>
+    </div>
+    <div class="ai-chat-messages" id="aiMessages"></div>
+    <div class="ai-chat-input-row">
+      <textarea class="ai-chat-input" id="aiInput" placeholder="Ketik pesan..." rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAiMsg();}"
+        oninput="this.style.height='38px';this.style.height=Math.min(this.scrollHeight,80)+'px'"></textarea>
+      <button class="ai-send-btn" id="aiSendBtn" onclick="sendAiMsg()">&#10148;</button>
+    </div>
+  </div>
+  </div>
+  <div id="aiChatBubble" onclick="toggleAiChat()">
+    🤖
+    <span class="ai-notif-dot" id="aiNotifDot">1</span>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://pyiymaudhpoefbragzbz.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_fXP6gYACqoKWzfyqI7rHiA_2TjhR9KK';
+
+// ===== SPONSOR POPUP =====
+let sponsorTimer = null;
+
+async function loadAndShowSponsor(){
+  try {
+    const res = await fetch(SUPABASE_URL+'/rest/v1/sponsor_banner?select=*&order=created_at.desc&limit=1',{
+      headers:{'apikey':SUPABASE_ANON_KEY,'Authorization':'Bearer '+SUPABASE_ANON_KEY}
+    });
+    const data = await res.json();
+    const sponsor = data[0];
+    if(!sponsor || !sponsor.active || !sponsor.image_base64) return;
+    document.getElementById('sponsorPopupImg').src = sponsor.image_base64;
+    const popup = document.getElementById('sponsorPopup');
+    popup.style.display = 'flex';
+    let sec = 5;
+    document.getElementById('sponsorSec').textContent = sec;
+    sponsorTimer = setInterval(()=>{
+      sec--;
+      const el = document.getElementById('sponsorSec');
+      if(el) el.textContent = sec;
+      if(sec <= 0){ clearInterval(sponsorTimer); closeSponsorPopup(); }
+    }, 1000);
+  }catch(e){ console.log('Sponsor load error:', e); }
+}
+
+function closeSponsorPopup(){
+  clearInterval(sponsorTimer);
+  const popup = document.getElementById('sponsorPopup');
+  popup.style.display = 'none';
+}
+
+// Tampilkan sponsor setelah 0.8 detik
+setTimeout(loadAndShowSponsor, 800);
+
+// ===== AI CHAT =====
+const AI_SYSTEM_FALLBACK = `Kamu adalah "NgeBot AI", asisten virtual dari NgebutStore — toko game pass terpercaya untuk game Car Driving Indonesia (CDID) dan Drag Drive Simulator (DDS) di Roblox.
+
+Tugasmu adalah membantu customer dengan ramah, singkat, dan informatif dalam Bahasa Indonesia. Kamu memiliki kepribadian yang semangat, friendly, dan profesional. Kamu sapa customer dengan Ngebuters dan kalau ada yang nanya tentang diskon suruh mereka check instagram @ngebutstore.id
+
+Info produk CDID yang tersedia:
+- Luxury Car Pass: 250 Robux, Rp 45.000
+- Rare Import Pass: 189 Robux, Rp 33.000
+- Retro Car Pass: 169 Robux, Rp 29.000
+- Emergency Vehicle Pass: 149 Robux, Rp 26.000
+- Advanced Modification: 99 Robux, Rp 17.000
+- Additional Car Slot: 49 Robux, Rp 9.000
+
+Metode pembayaran: DANA, GoPay, OVO, ShopeePay, BCA, Mandiri, BNI, BRI, QRIS.
+Proses instan setelah pembayaran dikonfirmasi.
+
+PENTING - Untuk cek status pesanan: minta customer ID Pesanan (12 karakter, contoh: A1B2C3D4E5F6).
+Jika tidak bisa dijawab, arahkan ke WhatsApp admin: https://wa.me/6283842700877.
+Jawab singkat (maks 2-3 kalimat), hangat, pakai emoji relevan.`;
+
+let AI_SYSTEM = AI_SYSTEM_FALLBACK;
+
+async function loadAIConfig() {
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/ai_config?key=eq.main_prompt&select=value&limit=1', {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Cache-Control': 'no-cache'
+      }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data[0] && data[0].value) {
+      AI_SYSTEM = data[0].value;
+    }
+  } catch(e) { console.log('AI config load error:', e); }
+}
+
+loadAIConfig();
+
+let aiHistory = [];
+let aiOpen = false;
+
+function toggleAiChat() {
+  aiOpen = !aiOpen;
+  const panel = document.getElementById('aiChatPanel');
+  const dot = document.getElementById('aiNotifDot');
+  if (aiOpen) {
+    panel.classList.add('open');
+    dot.style.display = 'none';
+    if (aiHistory.length === 0) {
+      addAiMsg('bot', 'Halo Ngebuters! NgeBot AI siap membantu. Ketik pertanyaanmu ya! 🤖✨');
+    }
+    setTimeout(() => {
+      const msgs = document.getElementById('aiMessages');
+      msgs.scrollTop = msgs.scrollHeight;
+      document.getElementById('aiInput').focus();
+    }, 100);
+  } else {
+    panel.classList.remove('open');
+  }
+}
+
+function addAiMsg(role, text) {
+  const msgs = document.getElementById('aiMessages');
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  const wrap = document.createElement('div');
+  wrap.className = 'ai-msg-wrap ' + (role === 'user' ? 'user-wrap' : 'bot-wrap');
+  wrap.innerHTML = '<div class="ai-msg ' + role + '">' + escHtml(text) + '</div><div class="ai-msg-time">' + time + '</div>';
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+  aiHistory.push({ role: role === 'bot' ? 'assistant' : 'user', content: text });
+}
+
+function escHtml(t){
+  t = t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  t = t.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" style="color:#2563eb;text-decoration:underline;word-break:break-all;">$1</a>');
+  t = t.replace(/@([a-zA-Z0-9_.]+)/g,'<a href="https://instagram.com/$1" target="_blank" style="color:#e1306c;text-decoration:underline;">@$1</a>');
+  t = t.replace(/\n/g,'<br>');
+  return t;
+}
+
+function showAiTyping() {
+  const msgs = document.getElementById('aiMessages');
+  const div = document.createElement('div');
+  div.id = 'aiTypingIndicator';
+  div.innerHTML = '<div class="ai-typing"><span></span><span></span><span></span></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function hideAiTyping() { const el=document.getElementById('aiTypingIndicator'); if(el)el.remove(); }
+
+async function fetchOrderForAI(orderId) {
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/transactions?id=eq.' + orderId.toUpperCase() + '&select=*', {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'Cache-Control': 'no-cache'
+      }
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data[0] || null;
+  } catch(e) { return null; }
+}
+
+function formatOrderForAI(tx) {
+  const statusMap = {
+    disiapkan: 'Disiapkan / Sedang diproses',
+    siap_diambil: 'Siap Diambil',
+    selesai: 'Selesai',
+    dibatalkan: 'Dibatalkan'
+  };
+  const toWIB = (iso) => {
+    if (!iso) return '-';
+    const d = new Date(iso);
+    return d.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) + ' WIB';
+  };
+  return `[DATA PESANAN] ID: ${tx.id} | Username: ${tx.username||'-'} | Pass: ${tx.pass_name||'-'} | Status: ${statusMap[tx.status]||tx.status||'-'} | Via: ${tx.payment_method||'-'} | Total: Rp ${Number(tx.price||0).toLocaleString('id-ID')} | Tanggal: ${toWIB(tx.created_at)}`;
+}
+
+async function sendAiMsg() {
+  const input = document.getElementById('aiInput');
+  const btn = document.getElementById('aiSendBtn');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = ''; input.style.height = '38px';
+  addAiMsg('user', text);
+  btn.disabled = true; showAiTyping();
+  try {
+    const orderIdMatch = text.match(/\b([A-Z0-9]{12})\b/i);
+    let userContent = text;
+    if (orderIdMatch) {
+      const orderId = orderIdMatch[1].toUpperCase();
+      const orderData = await fetchOrderForAI(orderId);
+      if (orderData) {
+        userContent = formatOrderForAI(orderData) + '\n\nPesan customer: ' + text;
+      } else {
+        userContent = text + '\n\n[SISTEM: ID pesanan ' + orderId + ' tidak ditemukan di database.]';
+      }
+    }
+    const msgs = aiHistory.slice(0, -1).map(m => ({ role: m.role, content: m.content }));
+    msgs.push({ role: 'user', content: userContent });
+    const res = await fetch('https://ngebotai.apam5922.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        max_tokens: 400,
+        messages: [{ role: 'system', content: AI_SYSTEM }, ...msgs]
+      })
+    });
+    const data = await res.json();
+    hideAiTyping();
+    const reply = data.choices && data.choices[0] ? data.choices[0].message.content : 'Maaf ada gangguan, coba lagi ya! 🙏';
+    addAiMsg('bot', reply);
+  } catch(e) {
+    hideAiTyping();
+    addAiMsg('bot', 'Koneksi bermasalah. Hubungi admin via WhatsApp ya! 🙏');
+  }
+  btn.disabled = false;
+  document.getElementById('aiInput').focus();
+}
+</script>
 </body>
 </html>
